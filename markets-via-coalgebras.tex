@@ -1,30 +1,470 @@
-\documentclass[11pt]{article}
-\usepackage[margin=1in]{geometry}
-\usepackage{amsmath,amssymb,amsthm}
-\usepackage{enumitem}
-\usepackage{hyperref}
+\documentclass[11pt, one side, article]{memoir}
+
+
+\settrims{0pt}{0pt} % page and stock same size
+\settypeblocksize{*}{35pc}{*} % {height}{width}{ratio}
+\setlrmargins{*}{*}{1} % {spine}{edge}{ratio}
+\setulmarginsandblock{.98in}{.98in}{*} % height of typeblock computed
+\setheadfoot{\onelineskip}{2\onelineskip} % {headheight}{footskip}
+\setheaderspaces{*}{1.5\onelineskip}{*} % {headdrop}{headsep}{ratio}
+\checkandfixthelayout
+
+
+\usepackage{amsthm}
+\usepackage{mathtools}
+
+\usepackage[inline]{enumitem}
+\usepackage[utf8]{inputenc} %allows non-ascii in bib file
+\usepackage{xcolor}
+
+\usepackage[backend=biber, backref=true, maxbibnames = 10, style = alphabetic]{biblatex}
+\usepackage[bookmarks=true, colorlinks=true, linkcolor=blue!50!black,
+citecolor=orange!50!black, urlcolor=orange!50!black, pdfencoding=unicode]{hyperref}
+\usepackage[capitalize]{cleveref}
+
 \usepackage{tikz}
-\usetikzlibrary{arrows.meta,positioning,calc}
+
+\usepackage{amssymb}
+\usepackage{newpxtext}
+\usepackage[varg,bigdelims]{newpxmath}
+\usepackage{mathrsfs}
+\usepackage{dutchcal}
+\usepackage{mathalfa}
+\usepackage{stmaryrd}
+\usepackage{graphicx}
+
+% xcolor %
+	\newcommand{\myred}[1]{{\color{red!60!black}#1}}
+	\newcommand{\myyellow}[1]{{\color{yellow!60!black}#1}}
+	\newcommand{\mygreen}[1]{{\color{green!40!black}#1}}
+
+% cleveref %
+  \newcommand{\creflastconjunction}{, and\nobreakspace} % serial comma
+  \crefformat{enumi}{\card#2#1#3}
+  \crefalias{chapter}{section}
+
+
+% biblatex %
+  \addbibresource{Library20260212.bib} 
+
+% hyperref %
+  \hypersetup{final}
+
+% enumitem %
+  \setlist{nosep}
+  \setlistdepth{6}
+
+
+
+% tikz %
+
+
+
+  \usetikzlibrary{ 
+  	cd,
+  	math,
+  	decorations.markings,
+		decorations.pathreplacing,
+  	positioning,
+  	arrows.meta,
+  	shapes,
+  	calc,
+  	fit,
+  	quotes
+  }
+  
+
+\tikzset{
+	oriented WD/.style={%everything after equals replaces "oriented WD" in key.
+		every to/.style={out=0,in=180,draw},
+    label/.style={
+    	font=\everymath\expandafter{\the\everymath\scriptstyle},
+      inner sep=0pt,
+      node distance=2pt and -2pt},
+    semithick,
+    node distance=1 and 1,
+    decoration={markings, mark=at position \stringdecpos with \stringdec},
+    ar/.style={postaction={decorate}},
+    execute at begin picture={\tikzset{
+    	x=\bbx, y=\bby,
+      every fit/.style={inner xsep=\bbx, inner ysep=\bby}}}
+    },
+    string decoration/.store in=\stringdec,
+    string decoration={\arrow{stealth};},
+    string decoration pos/.store in=\stringdecpos,
+    string decoration pos=.7,
+    bbx/.store in=\bbx,
+    bbx = 1.5cm,
+    bby/.store in=\bby,
+    bby = 1.5ex,
+    bb port sep/.store in=\bbportsep,
+    bb port sep=1.5,
+    % bb wire sep/.store in=\bbwiresep,
+    % bb wire sep=1.75ex,
+    bb port length/.store in=\bbportlen,
+    bb port length=4pt,
+    bb penetrate/.store in=\bbpenetrate,
+    bb penetrate=0,
+    bb min width/.store in=\bbminwidth,
+    bb min width=1cm,
+    bb rounded corners/.store in=\bbcorners,
+    bb rounded corners=2pt,
+	dot size/.store in=\dotsize,
+	dot size=2pt,
+	dot/.style={
+		circle, draw, thick, inner sep=0, fill=black, minimum width=\dotsize
+	},
+    bb spider/.style={
+    	bb port sep=1, bb port length=10pt, bbx=.4cm, bb min width=.4cm, bby=.8ex},
+    bb small/.style={
+    	bb port sep=1, bb port length=2.5pt, bbx=.4cm, bb min width=.4cm, bby=.7ex},
+		bb medium/.style={
+			bb port sep=1, bb port length=2.5pt, bbx=.4cm, bb min width=.4cm, bby=.9ex},
+    bb/.code 2 args={%When you see this key, run the code below:
+    	\pgfmathsetlengthmacro{\bbheight}{\bbportsep * (max(#1,#2)+1) * \bby}
+      \pgfkeysalso{draw,minimum height=\bbheight,minimum
+       width=\bbminwidth,outer sep=0pt,
+         rounded corners=\bbcorners,thick,
+         prefix after command={\pgfextra{\let\fixname\tikzlastnode}},
+         append after command={\pgfextra{\draw
+            \ifnum #1=0{} \else foreach \i in {1,...,#1} {
+            	($(\fixname.north west)!{\i/(#1+1)}!(\fixname.south west)$) +(-\bbportlen,0) coordinate (\fixname_in\i) -- +(\bbpenetrate,0) coordinate (\fixname_in\i')}\fi 
+  					%Define the endpoints of tickmarks
+            \ifnum #2=0{} \else foreach \i in {1,...,#2} {
+            	($(\fixname.north east)!{\i/(#2+1)}!(\fixname.south east)$) +(-
+\bbpenetrate,0) coordinate (\fixname_out\i') -- +(\bbportlen,0) coordinate (\fixname_out\i)}\fi;
+           }}}
+		},
+			bb name/.style={
+     	append after command={
+				\pgfextra{\node[anchor=north] at (\fixname.north) {#1};}
+			}
+		}
+  }
+
+
+
+% Adjunctions
+\newcommand{\adj}[5][30pt]{%[size] Cat L, Left, Right, Cat R.
+\begin{tikzcd}[ampersand replacement=\&, column sep=#1]
+  #2\ar[r, shift left=5pt, "#3"]
+  \ar[r, phantom, "\scriptstyle\Rightarrow"]\&
+  #5\ar[l, shift left=5pt, "#4"]
+\end{tikzcd}
+}
+
+\newcommand{\adjr}[5][30pt]{%[size] Cat R, Right, Left, Cat L.
+\begin{tikzcd}[ampersand replacement=\&, column sep=#1]
+  #2\ar[r, shift left=5pt, "#3"]\&
+  #5\ar[l, shift left=5pt, "#4"]
+  \ar[l, phantom, "\scriptstyle\Leftarrow"]
+\end{tikzcd}
+}
+
+
+
+
+  
+  % amsthm + aliascnt for correct cref names %
+\usepackage{aliascnt}
+
 \theoremstyle{definition}
-\newtheorem{definition}{Definition}
-\newtheorem{proposition}[definition]{Proposition}
-\newtheorem{question}[definition]{Question}
-\newtheorem{example}[definition]{Example}
-\theoremstyle{remark}
-\newtheorem*{remark}{Remark}
+\newtheorem{definitionx}{Definition}
+
+\newaliascnt{examplex}{definitionx}
+\newtheorem{examplex}[examplex]{Example}
+\aliascntresetthe{examplex}
+\crefname{examplex}{Example}{Examples}
+
+\newaliascnt{remarkx}{definitionx}
+\newtheorem{remarkx}[remarkx]{Remark}
+\aliascntresetthe{remarkx}
+\crefname{remarkx}{Remark}{Remarks}
+
+\newaliascnt{notation}{definitionx}
+\newtheorem{notation}[notation]{Notation}
+\aliascntresetthe{notation}
+\crefname{notation}{Notation}{Notations}
+
+\newaliascnt{question}{definitionx}
+\newtheorem{question}[question]{Question}
+\aliascntresetthe{question}
+\crefname{question}{Question}{Questions}
+
+
+\theoremstyle{plain}
+
+\newaliascnt{theorem}{definitionx}
+\newtheorem{theorem}[theorem]{Theorem}
+\aliascntresetthe{theorem}
+\crefname{theorem}{Theorem}{Theorems}
+
+\newaliascnt{proposition}{definitionx}
+\newtheorem{proposition}[proposition]{Proposition}
+\aliascntresetthe{proposition}
+\crefname{proposition}{Proposition}{Propositions}
+
+\newaliascnt{corollary}{definitionx}
+\newtheorem{corollary}[corollary]{Corollary}
+\aliascntresetthe{corollary}
+\crefname{corollary}{Corollary}{Corollaries}
+
+\newaliascnt{lemma}{definitionx}
+\newtheorem{lemma}[lemma]{Lemma}
+\aliascntresetthe{lemma}
+\crefname{lemma}{Lemma}{Lemmas}
+
+\newaliascnt{warning}{definitionx}
+\newtheorem{warning}[warning]{Warning}
+\aliascntresetthe{warning}
+\crefname{warning}{Warning}{Warnings}
+
+\newtheorem*{theorem*}{Theorem}
+\newtheorem*{proposition*}{Proposition}
+\newtheorem*{corollary*}{Corollary}
+\newtheorem*{lemma*}{Lemma}
+\newtheorem*{warning*}{Warning}
+
+\newenvironment{example}
+  {\pushQED{\qed}\renewcommand{\qedsymbol}{$\lozenge$}\examplex}
+  {\popQED\endexamplex}
+  
+ \newenvironment{remark}
+  {\pushQED{\qed}\renewcommand{\qedsymbol}{$\lozenge$}\remarkx}
+  {\popQED\endremarkx}
+  
+  \newenvironment{definition}
+  {\pushQED{\qed}\renewcommand{\qedsymbol}{$\lozenge$}\definitionx}
+  {\popQED\enddefinitionx} 
+
+    
+%-------- Single symbols --------%
+	
+\DeclareSymbolFont{stmry}{U}{stmry}{m}{n}
+\DeclareMathSymbol\fatsemi\mathop{stmry}{"23}
+
+\DeclareFontFamily{U}{mathx}{\hyphenchar\font45}
+\DeclareFontShape{U}{mathx}{m}{n}{
+      <5> <6> <7> <8> <9> <10>
+      <10.95> <12> <14.4> <17.28> <20.74> <24.88>
+      mathx10
+      }{}
+\DeclareSymbolFont{mathx}{U}{mathx}{m}{n}
+\DeclareFontSubstitution{U}{mathx}{m}{n}
+\DeclareMathAccent{\widecheck}{0}{mathx}{"71}
+
+\ExplSyntaxOn
+\NewDocumentEnvironment{sequation}{O{\fontsize{15pt}{15pt}\selectfont
+}b}
+ {
+  \yufip_sequation:nnn {equation}{#1}{#2}
+ }{}
+\NewDocumentEnvironment{sequation*}{O{\fontsize{16pt}{16pt}\selectfont
+}b}
+ {
+  \yufip_sequation:nnn {equation*}{#1}{#2}
+ }{}
+\cs_new_protected:Nn \yufip_sequation:nnn
+ {
+  \begin{#1}
+  \mbox{#2$\displaystyle#3$}
+  \end{#1}
+ }
+\ExplSyntaxOff
+
+%-------- Renewed commands --------%
+
+\renewcommand{\ss}{\subseteq}
+
+%-------- Other Macros --------%
+
+
+\DeclarePairedDelimiter{\present}{\langle}{\rangle}
+\DeclarePairedDelimiter{\copair}{(}{)}
+\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+\DeclarePairedDelimiter{\code}{\ulcorner}{\urcorner}
+\DeclarePairedDelimiter{\ihom}{[}{]}
+\DeclarePairedDelimiter{\sem}{\llbracket}{\rrbracket}
+
+\DeclareMathOperator{\Hom}{Hom}
+\DeclareMathOperator{\Mor}{Mor}
+\DeclareMathOperator{\dom}{dom}
+\DeclareMathOperator{\cod}{cod}
+\DeclareMathOperator{\idy}{idy}
+\DeclareMathOperator{\comp}{com}
+\DeclareMathOperator*{\colim}{colim}
+\DeclareMathOperator{\im}{im}
+\DeclareMathOperator{\ob}{Ob}
+\DeclareMathOperator{\Tr}{Tr}
+\DeclareMathOperator{\el}{El}
+\DeclareMathOperator{\votimes}{\varotimes}
+
+\newcommand{\iHom}{\ul{\Hom}}
+
+
+
+\newcommand{\const}[1]{\texttt{#1}}%a constant, or named element of a set
+\newcommand{\Set}[1]{\mathsf{#1}}%a named set
+\newcommand{\ord}[1]{\mathsf{#1}}%an ordinal
+\newcommand{\cat}[1]{\mathcal{#1}}%a generic category
+\newcommand{\Cat}[1]{\mathbf{#1}}%a named category
+\newcommand{\fun}[1]{\mathrm{#1}}%a function
+\newcommand{\Fun}[1]{\mathsf{#1}}%a named functor
+
+
+
+
+\newcommand{\id}{\mathrm{id}}
+\newcommand{\then}{\mathbin{\fatsemi}}
+
+\newcommand{\cocolon}{:\!}
+
+
+\newcommand{\iso}{\cong}
+\newcommand{\too}{\longrightarrow}
+\newcommand{\tto}{\rightrightarrows}
+\newcommand{\To}[2][]{\xrightarrow[#1]{\tn{$#2$}}}
+\renewcommand{\Mapsto}[1]{\xmapsto{#1}}
+\newcommand{\Tto}[3][13pt]{\begin{tikzcd}[sep=#1, cramped, ampersand replacement=\&, text height=1ex, text depth=.3ex]\ar[r, shift left=2pt, "#2"]\ar[r, shift right=2pt, "#3"']\&{}\end{tikzcd}}
+\newcommand{\Too}[1]{\xrightarrow{\;\;#1\;\;}}
+\newcommand{\from}{\leftarrow}
+\newcommand{\ffrom}{\leftleftarrows}
+\newcommand{\From}[1]{\xleftarrow{#1}}
+\newcommand{\Fromm}[1]{\xleftarrow{\;\;#1\;\;}}
+\newcommand{\surj}{\twoheadrightarrow}
+\newcommand{\inj}{\rightarrowtail}
+\newcommand{\imp}{\Rightarrow}
+\renewcommand{\iff}{\Leftrightarrow}
+\newcommand{\down}{\mathbin{\downarrow}}
+\newcommand{\fromto}{\leftrightarrows}
+\newcommand{\card}{\,^{\#}}
+
+
+\newcommand{\inv}{^{-1}}
+\newcommand{\op}{^\tn{op}}
+
+\newcommand{\tn}[1]{\textnormal{#1}}
+\newcommand{\ol}[1]{\overline{#1}}
+\newcommand{\ul}[1]{\underline{#1}}
+\newcommand{\wt}[1]{\widetilde{#1}}
+\newcommand{\wh}[1]{\widehat{#1}}
+\newcommand{\wc}[1]{\widecheck{#1}}
+\newcommand{\ubar}[1]{\underaccent{\bar}{#1}}
+
+
+\newcommand{\bb}{\mathbb{B}}
+\newcommand{\cc}{\mathbb{C}}
+\newcommand{\nn}{\mathbb{N}}
+\newcommand{\pp}{\mathbb{P}}
+\newcommand{\qq}{\mathbb{Q}}
+\newcommand{\zz}{\mathbb{Z}}
+\newcommand{\rr}{\mathbb{R}}
+\newcommand{\UU}{\mathbb{U}}
+
+
+\newcommand{\finset}{\Cat{Fin}}
+\newcommand{\smset}{\Cat{Set}}
+\newcommand{\smcat}{\Cat{Cat}}
+\newcommand{\End}{\Cat{End}}
+\newcommand{\Aut}{\Cat{Aut}}
+
+\newcommand{\List}{\Fun{list}}
+\newcommand{\set}{\tn{-}\Cat{Set}}
+
+
+
+
+\newcommand{\yon}{{\mathcal{y}}}
+\newcommand{\poly}{\Cat{Poly}}
+\newcommand{\polytree}{\Cat{PolyTr}_\UU}
+\newcommand{\cart}{\tn{cart}}
+\newcommand{\tocart}{\To{\cart}}
+\newcommand{\polycart}{\poly^\cart}
+\newcommand{\ppoly}{\mathbb{P}\Cat{oly}}
+\newcommand{\0}{\textsf{0}}
+\newcommand{\1}{\tn{\textsf{1}}}
+\newcommand{\tri}{\mathbin{\triangleleft}}
+\newcommand{\irt}{\mathbin{\triangleright}}
+\newcommand{\at}[2]{\left[#1\mathbin{/}#2\right]}
+%\newcommand{\at}[2]{#1\mathbin{/}#2}
+\newcommand{\tripow}[1]{^{\tri #1}}
+\newcommand{\tenspow}[1]{^{\otimes #1}}
+\newcommand{\duoid}{\Fun{Duoid}}
+\newcommand{\cofree}{\mathfrak{c}}
+\newcommand{\free}{\mathfrak{m}}
+\newcommand{\freecol}{\mathfrak{m}^\otimes}
+\newcommand{\uu}{\mathrm{u}}
+\newcommand{\Cmd}{\Cat{Cmd}}
+\newcommand{\coh}[1]{^{(#1)}}
+\newcommand{\tc}[1]{\mathtt{#1}}
+\newcommand{\proot}{.\mathtt{root}}
+\newcommand{\prest}{.\mathtt{rest}}
+\newcommand{\ppos}{.\mathtt{pos}}
+\newcommand{\pdir}{.\mathtt{dir}}
+
+% lenses
+\newcommand{\biglens}[2]{
+     \begin{bmatrix}{\vphantom{f_f^f}#2} \\ {\vphantom{f_f^f}#1} \end{bmatrix}
+}
+\newcommand{\littlelens}[2]{
+     \begin{bsmallmatrix}{\vphantom{f}#2} \\ {\vphantom{f}#1} \end{bsmallmatrix}
+}
+\newcommand{\lens}[2]{
+  \relax\if@display
+     \biglens{#1}{#2}
+  \else
+     \littlelens{#1}{#2}
+  \fi
+}
+
+\newcommand{\hh}[2][]{#1 \tn{#2} #1}
+\newcommand{\qqand}{\hh[\qquad]{and}}
+\newcommand{\qand}{\hh[\quad]{and}}
+\renewcommand{\iff}[1][\;\;]{#1\Leftrightarrow#1}
+\newcommand{\ifff}[1][\;\;]{#1\xLeftrightarrow{\quad}#1}
+\newcommand{\hi}[4][]{#1 #2 \tn{\textit{#4}} #3}
+\newcommand{\where}[1][,]{\hi[#1]{\qquad}{\quad}{where}}
+\newcommand{\qimplies}{\hh[\quad]{$\implies$}}
+\newcommand{\qqor}{\hh[\qquad]{or}}
+
+\newcommand{\coalg}{\tn{-}\Cat{Coalg}}
+\newcommand{\org}{\mathbb{O}\Cat{rg}}
+\newcommand{\orgtree}{\mathbb{O}\Cat{rgTr}}
+\newcommand{\orgci}{\Cat{Org}_{\tn{CI}}}
+
 \newcommand{\Coalg}{\mathrm{Coalg}}
-\newcommand{\Set}{\mathrm{Set}}
 \newcommand{\Event}{\mathrm{Event}}
 \newcommand{\CLOB}{\mathrm{CLOB}}
 \newcommand{\LO}{\mathrm{LO}}
 
-\title{Markets as Subcategories of a Free Colored Prop}
-\author{Joseph Hirsh and David Spivak}
+
+
+\newcommand{\thanksAFOSR}[1]{This material is based upon work supported by the Air Force Office of Scientific Research under award number #1}
+
+% ---- Changeable document parameters ---- %
+
+\linespread{1.1}
+\allowdisplaybreaks
+\setsecnumdepth{section}
+\settocdepth{section}
+\setlength{\parindent}{15pt}
+\setcounter{tocdepth}{1}
+
+
+
+\title{A categorical approach to markets}
+\author{Joseph Hirsh and David I. Spivak\thanks{\thanksAFOSR{FA9550-23-1-0376}}}
 \date{}
+
 \begin{document}
 \maketitle
 
-Fix a finite-dimensional real vector space $V$ (the \emph{portfolio space}).  We model economic agents as coalgebras for a polynomial endofunctor, and trading events as generators of a free colored prop.  A market is a structured collection of events selected by a mechanism (e.g., a central limit order book).
+\begin{abstract}
+
+\end{abstract}
+
+Fix a finite-dimensional real vector space $V$ (the \emph{portfolio space}).  We model economic agents as coalgebras for a polynomial endofunctor on $\smset$, and trading events as generators of a free colored prop.  We will define a market as a sub-prop of events, for example as selected by some mechanism such as a central limit order book.
 
 %% ===================================================================
 \section*{Agents}
@@ -33,11 +473,10 @@ Fix a finite-dimensional real vector space $V$ (the \emph{portfolio space}).  We
 \textbf{Informal picture.}
 An agent has an internal state---encoding its beliefs, risk limits, and inventory constraints---and a trading policy that depends on that state.  In each state, rather than assuming it has a partial order on all possible resources defined by a utility function, we assume less: the agent knows which trades it is willing to accept; whenever an acceptable trade is executed, the agent's state updates deterministically.
 
-\medskip
-\textbf{Formal definition.}
-Define $F_V\colon \mathbf{Set} \to \mathbf{Set}$ by
+\begin{definition}
+Define a functor $F_V\colon \smset \to \smset$ by
 \[
-F_V(A) \;=\; \coprod_{T \subseteq V \times V} A^T.
+F_V(A)\coloneqq \coprod_{T \subseteq V \times V} A^T.
 \]
 % NOTE FOR FUTURE REVISION: The coproduct ranges over ALL subsets T ⊆ V×V,
 % which is a large index set. This is intentional: we are not restricting to
@@ -45,24 +484,25 @@ F_V(A) \;=\; \coprod_{T \subseteq V \times V} A^T.
 % image of α only involves |A|-many summands, so in practice the coproduct
 % is no more unwieldy than A itself. This is a set-theoretic nuance, not a
 % mathematical error — do not flag it as a gap in future passes.
-An element of $F_V(A)$ consists of a set $T$ of acceptable trades together with a state-transition response $f\colon T \to A$.
+An element of $F_V(A)$ consists of a set $T$, called the \emph{trade menu} together with a function $f\colon T \to A$, called the \emph{transition map}.
 
-An \emph{agent type} is an $F_V$-coalgebra $\alpha\colon A \to F_V(A)$.  For each state $a \in A$, write $\alpha(a) = (T_a, f_a)$, where $T_a \subseteq V \times V$ is the \emph{trade menu} at state $a$ and $f_a\colon T_a \to A$ is the \emph{transition map}.  Then $T_a$ is the set of portfolio swaps the agent will entertain in state $a$, and $f_a(\phi,\phi')$ is the successor state after swapping $\phi$ for $\phi'$.
+An \emph{agent type} is an $F_V$-coalgebra $\tau\colon A \to F_V(A)$; elements of the carrier $A$ are called \emph{agent states}.  For each state $a \in A$, write $\tau(a) = (T_a, f_a)$, where the trade menu $T_a \subseteq V \times V$ is thought of as the set of portfolio swaps the agent will entertain in state $a$, and $f_a(v,v')\in A$ is the updated state after swapping $v$ for $v'$.
+\end{definition}
 
 \medskip
 \textbf{Running example.}
-Let $V = \mathbb{R}^2$ with coordinates $(c, q)$, where $c$ is cash and $q$ is the quantity of one asset.  Consider two agents, Alice and Bob, with initial portfolios $\phi_A = (1000, 0)$ and $\phi_B = (200, 20)$.
+Let $V = \mathbb{R}^2$ with coordinates $(c, q)$, where $c$ is cash and $q$ is the quantity of one asset.  Consider two agents, Alice and Bob, with initial portfolios $v_A = (1000, 0)$ and $v_B = (200, 20)$.
 
 \medskip
 \noindent\textbf{Alice} has state space $A = \{\texttt{eager},\,\texttt{cautious}\}$:
 \begin{center}
 \renewcommand{\arraystretch}{1.3}
-\begin{tabular}{lll}
+\begin{tabular}{p{2.2cm}p{5.8cm}p{5cm}}
 \hline
-State $a$ & Trade menu $T_a$ & Transition $f_a(\phi,\phi')$ \\
+State $a$ & Trade menu $T_a$ & Transition $f_a(v,v')$ \\
 \hline
-$\texttt{eager}$ & buy up to 5 shares at $\leq\$102$ each & $\texttt{cautious}$ for all $(\phi,\phi') \in T_a$ \\
-$\texttt{cautious}$ & buy up to 2 shares at $\leq\$98$ each & $\texttt{cautious}$ for all $(\phi,\phi') \in T_a$ \\
+$\texttt{eager}$ & buy up to 5 shares at $\leq\$102$ each & $\texttt{cautious}$ for all $(v,v') \in T_a$ \\
+$\texttt{cautious}$ & buy up to 2 shares at $\leq\$98$ each & $\texttt{cautious}$ for all $(v,v') \in T_a$ \\
 \hline
 \end{tabular}
 \end{center}
@@ -71,11 +511,11 @@ $\texttt{cautious}$ & buy up to 2 shares at $\leq\$98$ each & $\texttt{cautious}
 \noindent\textbf{Bob} has state space $B = \{\texttt{hold}\}$:
 \begin{center}
 \renewcommand{\arraystretch}{1.3}
-\begin{tabular}{lll}
+\begin{tabular}{p{2.2cm}p{5.8cm}p{5cm}}
 \hline
-State $a$ & Trade menu $T_a$ & Transition $f_a(\phi,\phi')$ \\
+State $a$ & Trade menu $T_a$ & Transition $f_a(v,v')$ \\
 \hline
-$\texttt{hold}$ & sell up to 10 shares at $\geq\$100$ each & $\texttt{hold}$ for all $(\phi,\phi') \in T_a$ \\
+$\texttt{hold}$ & sell up to 10 shares at $\geq\$100$ each & $\texttt{hold}$ for all $(v,v') \in T_a$ \\
 \hline
 \end{tabular}
 \end{center}
@@ -85,56 +525,49 @@ $\texttt{hold}$ & sell up to 10 shares at $\geq\$100$ each & $\texttt{hold}$ for
 %% ===================================================================
 
 \textbf{Informal picture.}
-An event involves some number of agents simultaneously.  Each agent enters with a current state and a current portfolio; each exits with a (possibly different) state and portfolio.  The agent types---meaning the coalgebra structures governing what each agent will accept---do not change during an event.  What changes is the distribution of resources.
+An event involves some number of agents simultaneously.  Each agent enters with a current state and a current portfolio and exits with a (possibly different) state and portfolio.  The agent types---meaning the coalgebra structures governing what each agent will accept---do not change during an event.  What can change is the distribution of resources and the state of each agent.
 
-We draw an event as a box in a string diagram.  Each wire carries a label $(A, \alpha, a, \phi)$: an agent type $(A,\alpha)$, a state $a$, and a portfolio $\phi$.  Wires entering from the left are the agents before the event; wires exiting to the right are the agents after.
+We draw an event as a box, as will later be used in string diagrams.  Each wire carries a label $(A, \tau, a, v)$: an agent type $(A,\tau)$, a state $a\in A$, and a portfolio $v\in V$.  Wires entering from the left are the agents before the event; wires exiting to the right are the agents after.
 
-\begin{center}
-\begin{tikzpicture}[
-    box/.style={draw, thick, minimum width=2cm, minimum height=2.4cm, fill=gray!8, font=\footnotesize},
-    wire/.style={thick, -{Stealth[length=4pt]}},
-    scale=0.92, every node/.style={scale=0.92}
-  ]
-  \node[box] (E) at (0,0) {$e$};
-
-  \draw[wire] (-4.8, 0.8) node[left,font=\scriptsize]{$(A_1,\alpha_1,a_1,\phi_1)$} -- (E.west |- 0,0.8);
-  \node[font=\scriptsize] at (-2.8, 0) {$\vdots$};
-  \node[font=\scriptsize] at (2.8, 0) {$\vdots$};
-  \draw[wire] (-4.8,-0.8) node[left,font=\scriptsize]{$(A_n,\alpha_n,a_n,\phi_n)$} -- (E.west |- 0,-0.8);
-
-  \draw[wire] (E.east |- 0,0.8) -- (4.8, 0.8) node[right,font=\scriptsize]{$(A_1,\alpha_1,a'_1,\phi'_1)$};
-  \draw[wire] (E.east |- 0,-0.8) -- (4.8,-0.8) node[right,font=\scriptsize]{$(A_n,\alpha_n,a'_n,\phi'_n)$};
+\[
+\begin{tikzpicture}[oriented WD, bby=2.5ex, bbx=1.5cm, bb port sep=1.5, bb min width=1.2cm]
+  \node[bb={2}{2}] (E) {event};
+  \draw (E_in1) to +(-.4cm,0) node[left, font=\scriptsize] {$(A_1,\tau_1,a_1,v_1)$};
+  \draw (E_in2) to +(-.4cm,0) node[left, font=\scriptsize] {$(A_n,\tau_n,a_n,v_n)$};
+  \draw (E_out1) to +(.4cm,0) node[right, font=\scriptsize] {$(A_1,\tau_1,a'_1,v'_1)$};
+  \draw (E_out2) to +(.4cm,0) node[right, font=\scriptsize] {$(A_n,\tau_n,a'_n,v'_n)$};
+  \node[above left=-9pt and 0] at ($(E_in1)!.5!(E_in2)$) {$\vdots$};
+  \node[above right=-9pt and 0] at ($(E_out1)!.5!(E_out2)$) {$\vdots$};
 \end{tikzpicture}
-\end{center}
+\]
+For this to be a valid event, two conditions must hold: 
+\begin{enumerate}
+  \item local conservation of value: the total value before and after must be the same, and
+  \item
+\end{enumerate}
+\begin{definition}
 
-For this to be a valid event, two conditions must hold:
+\end{definition}
+
 \begin{enumerate}[label=\textbf{(C\arabic*)}]
-\item $\displaystyle\sum_i \phi'_i = \sum_i \phi_i$ \hfill (local conservation of value),
-\item $(\phi_i,\phi'_i) \in T_{a_i}$ and $a'_i = f_{a_i}(\phi_i,\phi'_i)$ for all $i$ \hfill (behavioral consistency).
+\item $\displaystyle\sum_i v'_i = \sum_i v_i$ \hfill (local conservation of value),
+\item $(v_i,v'_i) \in T_{a_i}$ and $a'_i = f_{a_i}(v_i,v'_i)$ for all $i$ \hfill (behavioral consistency).
 \end{enumerate}
 
 \textbf{(C1)} says that within a single event, resources are redistributed, not generated.  This is a local, momentary condition---it would only amount to a global conservation law if $V$ captured all resources in the economy, which the formalism deliberately does not require.
 
-\textbf{(C2)} says each agent acts according to its own coalgebra: the trade $(\phi_i, \phi'_i)$ must be acceptable in state $a_i$, and the new state must be the one the coalgebra dictates.
+\textbf{(C2)} says each agent acts according to its own coalgebra: the trade $(v_i, v'_i)$ must be acceptable in state $a_i$, and the new state must be the one the coalgebra dictates.
 
 \begin{example}\label{ex:event}
-Alice is in state \texttt{eager} with portfolio $\phi_A = (1000, 0)$; Bob is in state \texttt{hold} with $\phi_B = (200, 20)$.  An event in which Alice buys 3 shares from Bob at \$100 each:
+Alice is in state \texttt{eager} with portfolio $v_A = (1000, 0)$; Bob is in state \texttt{hold} with $v_B = (200, 20)$.  An event in which Alice buys 3 shares from Bob at \$100 each:
 
 \begin{center}
-\begin{tikzpicture}[
-    box/.style={draw, thick, minimum width=2cm, minimum height=1.4cm, fill=gray!8, font=\footnotesize},
-    wire/.style={thick, -{Stealth[length=4pt]}},
-    alicewire/.style={thick, blue!70!black, -{Stealth[length=4pt]}},
-    bobwire/.style={thick, red!60!black, -{Stealth[length=4pt]}},
-    scale=0.92, every node/.style={scale=0.92}
-  ]
-  \node[box] (E) at (0,0) {$e_1$};
-
-  \draw[alicewire] (-5.2, 0.35) node[left,font=\scriptsize,text=blue!70!black]{Alice: $(\texttt{eager},\;(1000,0))$} -- (E.west |- 0,0.35);
-  \draw[bobwire] (-5.2,-0.35) node[left,font=\scriptsize,text=red!60!black]{Bob: $(\texttt{hold},\;(200,20))$} -- (E.west |- 0,-0.35);
-
-  \draw[alicewire] (E.east |- 0,0.35) -- (5.2, 0.35) node[right,font=\scriptsize,text=blue!70!black]{$(\texttt{cautious},\;(700,3))$};
-  \draw[bobwire] (E.east |- 0,-0.35) -- (5.2,-0.35) node[right,font=\scriptsize,text=red!60!black]{$(\texttt{hold},\;(500,17))$};
+\begin{tikzpicture}[oriented WD, bby=2.5ex, bbx=1.5cm, bb port sep=1, bb min width=1.2cm]
+  \node[bb={2}{2}] (E) {$e_1$};
+  \draw[blue!70!black] (E_in1) to +(-.4cm,0) node[left, font=\scriptsize, text=blue!70!black] {Alice: $(\texttt{eager},\;(1000,0))$};
+  \draw[red!60!black] (E_in2) to +(-.4cm,0) node[left, font=\scriptsize, text=red!60!black] {Bob: $(\texttt{hold},\;(200,20))$};
+  \draw[blue!70!black] (E_out1) to +(.4cm,0) node[right, font=\scriptsize, text=blue!70!black] {$(\texttt{cautious},\;(700,3))$};
+  \draw[red!60!black] (E_out2) to +(.4cm,0) node[right, font=\scriptsize, text=red!60!black] {$(\texttt{hold},\;(500,17))$};
 \end{tikzpicture}
 \end{center}
 
@@ -142,7 +575,7 @@ Alice is in state \texttt{eager} with portfolio $\phi_A = (1000, 0)$; Bob is in 
 
 \noindent\emph{Behavioral consistency:}
 \begin{itemize}[nosep]
-\item Alice in state \texttt{eager} accepts buying up to 5 shares at $\leq\$102$.  The trade is 3 shares at \$100, so $(\phi_A, \phi'_A) \in T_{\texttt{eager}}$, and $\alpha_A$ sends her to \texttt{cautious}.
+\item Alice in state \texttt{eager} accepts buying up to 5 shares at $\leq\$102$.  The trade is 3 shares at \$100, so $(v_A, v'_A) \in T_{\texttt{eager}}$, and $\tau_A$ sends her to \texttt{cautious}.
 \item Bob in \texttt{hold} accepts selling up to 10 at $\geq\$100$.  The trade qualifies, and he stays in \texttt{hold}.
 \end{itemize}
 \end{example}
@@ -156,31 +589,26 @@ Two events can be placed in sequence---the output wires of the first feed into t
 \small\textbf{Categorical aside} (skip if you are not interested in the category theory machinery).
 
 \smallskip
-The color set is $W_V = \{(A, \alpha, a, \phi)\}$, and valid one-step events form a generating signature $\Sigma$.  The \emph{event prop} $\Event_V$ is the free $W_V$-colored symmetric strict monoidal category on $\Sigma$, with no imposed equations.  By Joyal--Street coherence, its morphisms are isomorphism classes of $W_V$-labeled string diagrams.
+The color set is $W_V = \{(A, \tau, a, v)\}$, and valid one-step events form a generating signature $\Sigma$.  The \emph{event prop} $\Event_V$ is the free $W_V$-colored symmetric strict monoidal category on $\Sigma$, with no imposed equations.  By Joyal--Street coherence, its morphisms are isomorphism classes of $W_V$-labeled string diagrams.
 
 \smallskip
 We take the \emph{free} prop because one-step events are not closed under sequential composition in general.  Consider two events composed sequentially, with an agent passing through both:
 
 \begin{center}
-\begin{tikzpicture}[
-    box/.style={draw, thick, minimum width=1.2cm, minimum height=0.8cm, fill=gray!8, font=\scriptsize},
-    wire/.style={thick, -{Stealth[length=3pt]}},
-    scale=0.85, every node/.style={scale=0.85}
-  ]
-  \node[box] (E1) at (0,0) {$e_1$};
-  \node[box] (E2) at (3.5,0) {$e_2$};
-
-  \draw[wire] (-2.2,0) node[left,font=\scriptsize]{$(a, \phi)$} -- (E1.west);
-  \draw[wire] (E1.east) -- (E2.west) node[midway,above,font=\scriptsize]{$(a', \phi')$};
-  \draw[wire] (E2.east) -- (5.7,0) node[right,font=\scriptsize]{$(a'', \phi'')$};
+\begin{tikzpicture}[oriented WD, bby=2ex, bbx=1.5cm, bb port sep=1, bb min width=1cm]
+  \node[bb={1}{1}] (E1) {$e_1$};
+  \node[bb={1}{1}, right=2 of E1] (E2) {$e_2$};
+  \draw (E1_in1) to +(-.4cm,0) node[left, font=\scriptsize] {$(a, v)$};
+  \draw (E1_out1) to node[above, font=\scriptsize] {$(a', v')$} (E2_in1);
+  \draw (E2_out1) to +(.4cm,0) node[right, font=\scriptsize] {$(a'', v'')$};
 \end{tikzpicture}
 \end{center}
 
-Behavioral consistency (C2) applied to $e_1$ gives $a' = f_a(\phi, \phi')$.  Applied to $e_2$, it gives $a'' = f_{a'}(\phi', \phi'')$.  If we tried to describe the composite as a single event from $(a, \phi)$ to $(a'', \phi'')$, condition (C2) would require $a'' = f_a(\phi, \phi'')$.  But the actual value of $a''$ is
+Behavioral consistency (C2) applied to $e_1$ gives $a' = f_a(v, v')$.  Applied to $e_2$, it gives $a'' = f_{a'}(v', v'')$.  If we tried to describe the composite as a single event from $(a, v)$ to $(a'', v'')$, condition (C2) would require $a'' = f_a(v, v'')$.  But the actual value of $a''$ is
 \[
-f_{f_a(\phi,\phi')}(\phi', \phi''),
+f_{f_a(v,v')}(v', v''),
 \]
-which need not equal $f_a(\phi, \phi'')$.  Moreover, $(\phi, \phi'')$ may not even belong to $T_a$.
+which need not equal $f_a(v, v'')$.  Moreover, $(v, v'')$ may not even belong to $T_a$.
 
 \smallskip
 Concretely: Alice starts in \texttt{eager}; after $e_1$ she transitions to \texttt{cautious}, which has a different trade menu (buy up to 2 at $\leq\$98$ instead of up to 5 at $\leq\$102$).  A composite event from \texttt{eager} to the final state cannot be described as a single one-step event evaluated against the \texttt{eager} menu alone.
@@ -237,7 +665,7 @@ A \emph{portfolio limit order} is a tuple $L = (\ell_1, \ldots, \ell_n)$, one li
 \end{definition}
 
 \begin{definition}[Limit order agent]
-A \emph{limit order agent} is a pair $w = (\phi, L)$: a portfolio $\phi \in V$ and a portfolio limit order $L$.
+A \emph{limit order agent} is a pair $w = (v, L)$: a portfolio $v \in V$ and a portfolio limit order $L$.
 \end{definition}
 
 This is the simplest model of a CLOB participant: a portfolio and a standing set of orders.  Note that this is \emph{not} rich enough to model Alice---her limit order depends on her internal state, and this definition has no state.  We will return to this point.
@@ -245,7 +673,7 @@ This is the simplest model of a CLOB participant: a portfolio and a standing set
 \subsubsection*{Fill events}
 
 \begin{definition}[Fill event]\label{def:fill-event}
-A \emph{fill event} among limit order agents $w_1 = (\phi_1, L_1), \ldots, w_m = (\phi_m, L_m)$ is a finite set of fills
+A \emph{fill event} among limit order agents $w_1 = (v_1, L_1), \ldots, w_m = (v_m, L_m)$ is a finite set of fills
 \[
 \mathcal{F} = \bigl\{(i_{\mathrm{buy}},\, \ell_{\mathrm{buy}},\; i_{\mathrm{sell}},\, \ell_{\mathrm{sell}},\; q',\; p^*)\bigr\}
 \]
@@ -253,39 +681,26 @@ each pairing a buy order from agent $i_{\mathrm{buy}}$ with a sell order from ag
 \end{definition}
 
 \begin{center}
-\begin{tikzpicture}[
-    box/.style={draw, thick, minimum width=2.2cm, minimum height=2cm, fill=gray!8, font=\footnotesize},
-    wire/.style={thick, -{Stealth[length=4pt]}},
-    scale=0.92, every node/.style={scale=0.92}
-  ]
-  \node[box] (E) at (0,0) {fill event};
-
-  \draw[wire] (-4.2, 0.6) node[left,font=\scriptsize]{$(\phi_1, L_1)$} -- (E.west |- 0,0.6);
-  \node[font=\scriptsize] at (-2.5, 0) {$\vdots$};
-  \node[font=\scriptsize] at (2.5, 0) {$\vdots$};
-  \draw[wire] (-4.2,-0.6) node[left,font=\scriptsize]{$(\phi_m, L_m)$} -- (E.west |- 0,-0.6);
-
-  \draw[wire] (E.east |- 0,0.6) -- (4.2, 0.6) node[right,font=\scriptsize]{$(\phi'_1, L_1)$};
-  \draw[wire] (E.east |- 0,-0.6) -- (4.2,-0.6) node[right,font=\scriptsize]{$(\phi'_m, L_m)$};
+\begin{tikzpicture}[oriented WD, bby=2.5ex, bbx=1.5cm, bb port sep=1.5, bb min width=1.2cm]
+  \node[bb={2}{2}] (E) {\footnotesize fill event};
+  \draw (E_in1) to +(-.4cm,0) node[left, font=\scriptsize] {$(v_1, L_1)$};
+  \draw (E_in2) to +(-.4cm,0) node[left, font=\scriptsize] {$(v_m, L_m)$};
+  \draw (E_out1) to +(.4cm,0) node[right, font=\scriptsize] {$(v'_1, L_1)$};
+  \draw (E_out2) to +(.4cm,0) node[right, font=\scriptsize] {$(v'_m, L_m)$};
+  \node[font=\scriptsize] at ($(E_in1)!.5!(E_in2)+(-.7cm,0)$) {$\vdots$};
+  \node[font=\scriptsize] at ($(E_out1)!.5!(E_out2)+(.7cm,0)$) {$\vdots$};
 \end{tikzpicture}
 \end{center}
 
 For instance, the event in Example~\ref{ex:event} is a fill event when Alice and Bob are viewed as limit order agents:
 
 \begin{center}
-\begin{tikzpicture}[
-    box/.style={draw, thick, minimum width=2.2cm, minimum height=1.4cm, fill=gray!8, font=\footnotesize},
-    alicewire/.style={thick, blue!70!black, -{Stealth[length=4pt]}},
-    bobwire/.style={thick, red!60!black, -{Stealth[length=4pt]}},
-    scale=0.92, every node/.style={scale=0.92}
-  ]
-  \node[box] (E) at (0,0) {fill};
-
-  \draw[alicewire] (-4.8, 0.35) node[left,font=\scriptsize,text=blue!70!black]{Alice: $((1000,0),\;\ell_A)$} -- (E.west |- 0,0.35);
-  \draw[bobwire] (-4.8,-0.35) node[left,font=\scriptsize,text=red!60!black]{Bob: $((200,20),\;\ell_B)$} -- (E.west |- 0,-0.35);
-
-  \draw[alicewire] (E.east |- 0,0.35) -- (4.8, 0.35) node[right,font=\scriptsize,text=blue!70!black]{$((700,3),\;\ell_A)$};
-  \draw[bobwire] (E.east |- 0,-0.35) -- (4.8,-0.35) node[right,font=\scriptsize,text=red!60!black]{$((500,17),\;\ell_B)$};
+\begin{tikzpicture}[oriented WD, bby=2.5ex, bbx=1.5cm, bb port sep=1, bb min width=1.2cm]
+  \node[bb={2}{2}] (E) {fill};
+  \draw[blue!70!black] (E_in1) to +(-.4cm,0) node[left, font=\scriptsize, text=blue!70!black] {Alice: $((1000,0),\;\ell_A)$};
+  \draw[red!60!black] (E_in2) to +(-.4cm,0) node[left, font=\scriptsize, text=red!60!black] {Bob: $((200,20),\;\ell_B)$};
+  \draw[blue!70!black] (E_out1) to +(.4cm,0) node[right, font=\scriptsize, text=blue!70!black] {$((700,3),\;\ell_A)$};
+  \draw[red!60!black] (E_out2) to +(.4cm,0) node[right, font=\scriptsize, text=red!60!black] {$((500,17),\;\ell_B)$};
 \end{tikzpicture}
 \end{center}
 
@@ -296,38 +711,28 @@ Conservation is automatic: each fill transfers $q'p^*$ cash from buyer to seller
 A natural question: what happens when we wire fill events together---some agents from one fill event feeding into another, with arbitrary wiring?  For example, three agents might participate in two fill events, with one agent's output from the first feeding into the second:
 
 \begin{center}
-\begin{tikzpicture}[
-    box/.style={draw, thick, minimum width=1.4cm, minimum height=1.2cm, fill=gray!8, font=\scriptsize},
-    wire/.style={thick, -{Stealth[length=3pt]}},
-    alicewire/.style={thick, blue!70!black, -{Stealth[length=3pt]}},
-    bobwire/.style={thick, red!60!black, -{Stealth[length=3pt]}},
-    carolwire/.style={thick, green!50!black, -{Stealth[length=3pt]}},
-    scale=0.88, every node/.style={scale=0.88}
-  ]
-  \node[box] (E1) at (0,0.4) {fill $f_1$};
-  \node[box] (E2) at (3.8,-0.4) {fill $f_2$};
-
+\begin{tikzpicture}[oriented WD, bby=2ex, bbx=1.2cm, bb port sep=1, bb min width=1.2cm]
+  \node[bb={2}{2}] (E1) {\scriptsize fill $f_1$};
+  \node[bb={2}{2}, right=3 of E1, yshift=-3ex] (E2) {\scriptsize fill $f_2$};
   % inputs to f1
-  \draw[alicewire] (-2.8, 0.65) node[left,font=\scriptsize,text=blue!70!black]{$w_1$} -- (E1.west |- 0,0.65);
-  \draw[bobwire]   (-2.8, 0.15) node[left,font=\scriptsize,text=red!60!black]{$w_2$} -- (E1.west |- 0,0.15);
-
-  % f1 output: w1' feeds into f2, w2' exits
-  \draw[alicewire] (E1.east |- 0,0.65) -- ++(0.6,0) -- ++(0,-0.8) -- (E2.west |- 0,-0.15);
-  \draw[bobwire]   (E1.east |- 0,0.15) -- (6.8,0.15) node[right,font=\scriptsize,text=red!60!black]{$w'_2$};
-
+  \draw[blue!70!black] (E1_in1) to +(-.4cm,0) node[left, font=\scriptsize, text=blue!70!black] {$w_1$};
+  \draw[red!60!black] (E1_in2) to +(-.4cm,0) node[left, font=\scriptsize, text=red!60!black] {$w_2$};
   % w3 input to f2
-  \draw[carolwire] (-2.8,-0.65) node[left,font=\scriptsize,text=green!50!black]{$w_3$} -- ++(2.6,0) -- ++(0,0) -- (E2.west |- 0,-0.65);
-
+  \draw[green!50!black] (E2_in2) to +(-.4cm,0) node[left, font=\scriptsize, text=green!50!black] {$w_3$};
+  % f1 output: w1' feeds into f2
+  \draw[blue!70!black] (E1_out1) to (E2_in1);
+  % f1 output: w2' exits
+  \draw[red!60!black] (E1_out2) to +(.4cm,0) node[right, font=\scriptsize, text=red!60!black] {$w'_2$};
   % f2 outputs
-  \draw[alicewire] (E2.east |- 0,-0.15) -- (6.8,-0.15) node[right,font=\scriptsize,text=blue!70!black]{$w'_1$};
-  \draw[carolwire] (E2.east |- 0,-0.65) -- (6.8,-0.65) node[right,font=\scriptsize,text=green!50!black]{$w'_3$};
+  \draw[blue!70!black] (E2_out1) to +(.4cm,0) node[right, font=\scriptsize, text=blue!70!black] {$w'_1$};
+  \draw[green!50!black] (E2_out2) to +(.4cm,0) node[right, font=\scriptsize, text=green!50!black] {$w'_3$};
 \end{tikzpicture}
 \end{center}
 
 It turns out that any such composite is itself achievable by a single fill event.
 
 \begin{proposition}\label{prop:fill-compose}
-Let $D$ be any string diagram built by wiring fill events together (sequentially, in parallel, or any combination) in which limit order agents $w_1, \ldots, w_m$ enter with portfolios $\phi_1, \ldots, \phi_m$ and exit with portfolios $\phi'_1, \ldots, \phi'_m$, all with the same limit orders $L_i$ throughout.  Then there exists a single fill event with the same input and output.
+Let $D$ be any string diagram built by wiring fill events together (sequentially, in parallel, or any combination) in which limit order agents $w_1, \ldots, w_m$ enter with portfolios $v_1, \ldots, v_m$ and exit with portfolios $v'_1, \ldots, v'_m$, all with the same limit orders $L_i$ throughout.  Then there exists a single fill event with the same input and output.
 \end{proposition}
 
 \begin{proof}
@@ -352,12 +757,12 @@ But the collapse also exposes what this model \emph{cannot} do.  Alice, whose wi
 A \emph{stateful limit order agent} has a set of internal states, and in each state, it presents a portfolio limit order.  After participating in a fill event, it transitions to a new state---possibly changing the orders it presents next.
 
 \begin{definition}[Stateful limit order agent]\label{def:stateful-lo}
-A \emph{stateful limit order agent} is a tuple $(S, s_0, \lambda, \tau, \phi)$ where:
+A \emph{stateful limit order agent} is a tuple $(S, s_0, \lambda, f, v)$ where:
 \begin{itemize}
 \item $S$ is a finite set of states, with initial state $s_0 \in S$,
 \item $\lambda\colon S \to \{\text{portfolio limit orders}\}$ assigns a portfolio limit order to each state,
-\item $\tau\colon S \times \{\text{valid fills of } \lambda(s)\} \to S$ is a transition map: after a fill in state $s$, the agent moves to state $\tau(s, \text{fill})$,
-\item $\phi \in V$ is the current portfolio.
+\item $f\colon S \times \{\text{valid fills of } \lambda(s)\} \to S$ is a transition map: after a fill in state $s$, the agent moves to state $f(s, \text{fill})$,
+\item $v \in V$ is the current portfolio.
 \end{itemize}
 \end{definition}
 
@@ -382,7 +787,7 @@ Without state, limit order events compose trivially---everything collapses to a 
 %% ===================================================================
 
 \begin{question}
-The functor $F_V(A) = \coprod_{T \subseteq V \times V} A^T$ does not appear to carry comonad structure: a counit $\varepsilon\colon F_V \to \mathrm{Id}$ would require extracting an element of $A$ from a pair $(T, f\colon T \to A)$, but $T$ may be empty.  What changes if we require every trade menu to be nonempty (the null trade is always available)?  Would $F_V$ then be a comonad, and would the coalgebra condition be meaningful?
+The functor $F_V(A) = \sum_{T \subseteq V \times V} A^T$ does not appear to carry comonad structure: a counit $\varepsilon\colon F_V \to \mathrm{Id}$ would require extracting an element of $A$ from a pair $(T, f\colon T \to A)$, but $T$ may be empty.  What changes if we require every trade menu to be nonempty (the null trade is always available)?  Would $F_V$ then be a comonad, and would the coalgebra condition be meaningful?
 \end{question}
 
 \begin{question}
@@ -392,9 +797,9 @@ Condition (C1) is a local, instantaneous conservation law.  It would only amount
 \begin{question}
 As noted in the categorical aside above, one-step events in $\Event_V$ are closed under sequential composition if and only if the coalgebra satisfies
 \[
-f_{f_a(\phi_1,\phi_2)}(\phi_2,\phi_3) \;=\; f_a(\phi_1,\phi_3)
+f_{f_a(v_1,v_2)}(v_2,v_3) \;=\; f_a(v_1,v_3)
 \]
-for all composable pairs $(\phi_1,\phi_2) \in T_a$ and $(\phi_2,\phi_3) \in T_{f_a(\phi_1,\phi_2)}$.  Characterize the $F_V$-coalgebras satisfying this condition.  Does it coincide with a known categorical notion?
+for all composable pairs $(v_1,v_2) \in T_a$ and $(v_2,v_3) \in T_{f_a(v_1,v_2)}$.  Characterize the $F_V$-coalgebras satisfying this condition.  Does it coincide with a known categorical notion?
 \end{question}
 
 \begin{question}
