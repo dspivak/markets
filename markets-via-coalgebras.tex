@@ -437,6 +437,7 @@ citecolor=orange!50!black, urlcolor=orange!50!black, pdfencoding=unicode]{hyperr
 \newcommand{\Event}{\mathrm{Event}}
 \newcommand{\CLOB}{\mathrm{CLOB}}
 \newcommand{\LO}{\mathrm{LO}}
+\newcommand{\dnote}[1]{{\color{blue}\quad$\lozenge$\quad David says:\quad #1\quad$\lozenge$\quad}}
 
 
 
@@ -543,10 +544,11 @@ We draw an event as a box, as will later be used in string diagrams.  Each wire 
 For this to be a valid event, two conditions must hold: 
 \begin{enumerate}
   \item local conservation of value: the total value before and after must be the same, and
-  \item
+  \item behavioral consistency: all trades and updates must accord with agents' states
 \end{enumerate}
 \begin{definition}
-
+For each $1\leq i\leq n$, let $(A_i,\tau_i)$ be an agent type, let $a_i,a_i'\in A_i$ be states, and let $v_i,v_i'$ be portfolios. An \emph{event} from $(A_i,\tau_i,a_i,v_i)_{i=1}^{n}$ to $(A_i,\tau_i,a_i',v_i')_{i=1}^{n}$ .......
+\dnote{Uh oh, I just realized this is not looking like a prop. You can't put events in parallel when they include the same agents.}
 \end{definition}
 
 \begin{enumerate}[label=\textbf{(C\arabic*)}]
