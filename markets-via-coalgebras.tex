@@ -479,6 +479,7 @@ Define a functor $F_V\colon \smset \to \smset$ by
 \[
 F_V(A)\coloneqq \coprod_{T \subseteq V \times V} A^T.
 \]
+\dnote{We could also include agent types given by what other information $L$ they need in order to update. For example, high frequency traders may want a list of other trades. $F_V^L\coloneqq\coprod_{T\ss V\times V}A^{TL}$.}
 % NOTE FOR FUTURE REVISION: The coproduct ranges over ALL subsets T ⊆ V×V,
 % which is a large index set. This is intentional: we are not restricting to
 % finite menus. The key point is that for any coalgebra α: A → F_V(A), the
@@ -528,7 +529,7 @@ $\texttt{hold}$ & sell up to 10 shares at $\geq\$100$ each & $\texttt{hold}$ for
 \textbf{Informal picture.}
 An event involves some number of agents simultaneously.  Each agent enters with a current state and a current portfolio and exits with a (possibly different) state and portfolio.  The agent types---meaning the coalgebra structures governing what each agent will accept---do not change during an event.  What can change is the distribution of resources and the state of each agent.
 
-We draw an event as a box, as will later be used in string diagrams.  Each wire carries a label $(A, \tau, a, v)$: an agent type $(A,\tau)$, a state $a\in A$, and a portfolio $v\in V$.  Wires entering from the left are the agents before the event; wires exiting to the right are the agents after.
+Let $\Set{Agent}$ denote the class of all tuples $(A, \tau, a, v)$ consisting of an agent type $(A,\tau)$, a state $a\in A$, and a portfolio $v\in V$; we call these \emph{agents}.  We draw an event as a box, as will later be used in string diagrams.  Each wire carries an agent.  Wires entering from the left are the agents before the event; wires exiting to the right are the agents after.
 
 \[
 \begin{tikzpicture}[oriented WD, bby=2.5ex, bbx=1.5cm, bb port sep=1.5, bb min width=1.2cm]
@@ -541,24 +542,18 @@ We draw an event as a box, as will later be used in string diagrams.  Each wire 
   \node[above right=-9pt and 0] at ($(E_out1)!.5!(E_out2)$) {$\vdots$};
 \end{tikzpicture}
 \]
-For this to be a valid event, two conditions must hold: 
-\begin{enumerate}
-  \item local conservation of value: the total value before and after must be the same, and
-  \item behavioral consistency: all trades and updates must accord with agents' states
-\end{enumerate}
+There will be three conditions for this to be a valid event, namely that there is no overall change in the amount of assets, that each agent was willing to make the trade that occurred, and that each agent updated to a new state consistent with their coalgebra structure.
 \begin{definition}
-For each $1\leq i\leq n$, let $(A_i,\tau_i)$ be an agent type, let $a_i,a_i'\in A_i$ be states, and let $v_i,v_i'$ be portfolios. An \emph{event} from $(A_i,\tau_i,a_i,v_i)_{i=1}^{n}$ to $(A_i,\tau_i,a_i',v_i')_{i=1}^{n}$ .......
-\dnote{Uh oh, I just realized this is not looking like a prop. You can't put events in parallel when they include the same agents.}
+Let $x,x'\colon I\to\Set{Agent}$ with $x(i)=(A_i,\tau_i,a_i,v_i)$ and $x'(i)=(A_i,\tau_i,a_i',v_i')$ for each $i\in I$. There exists an \emph{exchange event}
+\[e\colon x\to x'\]
+if three conditions hold
+\begin{description}
+	\item[\quad Value conservation:] $\sum_{i\in I} v_i=\sum_{i\in I}v_i'$
+	\item[\quad Trade willingness:] $(v_i,v_i')\in T_i$, for each $i$, and
+	\item[\quad Update consistency:] $f_i(v_i,v_i')=a_i'$, for each $i$.
+\end{description}
+where $(T_i,f_i)\coloneqq\tau_i(a_i)$ for each $i$.
 \end{definition}
-
-\begin{enumerate}[label=\textbf{(C\arabic*)}]
-\item $\displaystyle\sum_i v'_i = \sum_i v_i$ \hfill (local conservation of value),
-\item $(v_i,v'_i) \in T_{a_i}$ and $a'_i = f_{a_i}(v_i,v'_i)$ for all $i$ \hfill (behavioral consistency).
-\end{enumerate}
-
-\textbf{(C1)} says that within a single event, resources are redistributed, not generated.  This is a local, momentary condition---it would only amount to a global conservation law if $V$ captured all resources in the economy, which the formalism deliberately does not require.
-
-\textbf{(C2)} says each agent acts according to its own coalgebra: the trade $(v_i, v'_i)$ must be acceptable in state $a_i$, and the new state must be the one the coalgebra dictates.
 
 \begin{example}\label{ex:event}
 Alice is in state \texttt{eager} with portfolio $v_A = (1000, 0)$; Bob is in state \texttt{hold} with $v_B = (200, 20)$.  An event in which Alice buys 3 shares from Bob at \$100 each:
@@ -573,57 +568,86 @@ Alice is in state \texttt{eager} with portfolio $v_A = (1000, 0)$; Bob is in sta
 \end{tikzpicture}
 \end{center}
 
-\noindent\emph{Conservation:} $(1000,0) + (200,20) = (700,3) + (500,17) = (1200, 20)$.
+\noindent\emph{Value conservation:} $(1000,0) + (200,20) = (700,3) + (500,17) = (1200, 20)$.
 
-\noindent\emph{Behavioral consistency:}
+\noindent\emph{Trade willingness:}
 \begin{itemize}[nosep]
-\item Alice in state \texttt{eager} accepts buying up to 5 shares at $\leq\$102$.  The trade is 3 shares at \$100, so $(v_A, v'_A) \in T_{\texttt{eager}}$, and $\tau_A$ sends her to \texttt{cautious}.
-\item Bob in \texttt{hold} accepts selling up to 10 at $\geq\$100$.  The trade qualifies, and he stays in \texttt{hold}.
+\item Alice in state \texttt{eager} accepts buying up to 5 shares at $\leq\$102$.  The trade is 3 shares at \$100, so $(v_A, v'_A) \in T_{\texttt{eager}}$.
+\item Bob in \texttt{hold} accepts selling up to 10 at $\geq\$100$.  The trade qualifies, so $(v_B, v'_B) \in T_{\texttt{hold}}$.
+\end{itemize}
+
+\noindent\emph{Update consistency:}
+\begin{itemize}[nosep]
+\item $f_{\texttt{eager}}(v_A, v'_A) = \texttt{cautious} = a'_A$.
+\item $f_{\texttt{hold}}(v_B, v'_B) = \texttt{hold} = a'_B$.
+\qedhere
 \end{itemize}
 \end{example}
 
-\medskip
-\textbf{Composition.}
-Two events can be placed in sequence---the output wires of the first feed into the input wires of the second---or in parallel, or in any combination the wiring allows.  Global conservation holds by induction: if each event individually conserves, so does any composite.
+Our next goal is to define a colored prop with $\Set{Agent}$ as the set of colors.  Given $x\colon I\to\Set{Agent}$ and $y\colon J\to\Set{Agent}$, we write $(x,y)\colon I+J\to\Set{Agent}$ for their copairing.
 
-\bigskip
-\noindent\fbox{\parbox{\dimexpr\textwidth-2\fboxsep-2\fboxrule}{%
-\small\textbf{Categorical aside} (skip if you are not interested in the category theory machinery).
+\begin{proposition}\label{prop:parallel}
+Given events $e\colon x\to x'$ and $f\colon y\to y'$, where $x,x'\colon I\to\Set{Agent}$ and $y,y'\colon J\to\Set{Agent}$, there exists an event
+\[(e,f)\colon (x,y)\to (x',y').\]
+\end{proposition}
 
-\smallskip
-The color set is $W_V = \{(A, \tau, a, v)\}$, and valid one-step events form a generating signature $\Sigma$.  The \emph{event prop} $\Event_V$ is the free $W_V$-colored symmetric strict monoidal category on $\Sigma$, with no imposed equations.  By Joyal--Street coherence, its morphisms are isomorphism classes of $W_V$-labeled string diagrams.
+\begin{proof}
+We just need to check the requirements. Value conservation holds $\sum_{i\in I}v_i+\sum_{j\in J}v_j=\sum_{i\in I}v'_i+\sum_{j\in J}v'_j$, since each sum holds separately.  Trade willingness and update consistency hold for each participant, since they hold in $e$ and $f$ respectively.
+\end{proof}
 
-\smallskip
-We take the \emph{free} prop because one-step events are not closed under sequential composition in general.  Consider two events composed sequentially, with an agent passing through both:
 
-\begin{center}
-\begin{tikzpicture}[oriented WD, bby=2ex, bbx=1.5cm, bb port sep=1, bb min width=1cm]
-  \node[bb={1}{1}] (E1) {$e_1$};
-  \node[bb={1}{1}, right=2 of E1] (E2) {$e_2$};
-  \draw (E1_in1) to +(-.4cm,0) node[left, font=\scriptsize] {$(a, v)$};
-  \draw (E1_out1) to node[above, font=\scriptsize] {$(a', v')$} (E2_in1);
-  \draw (E2_out1) to +(.4cm,0) node[right, font=\scriptsize] {$(a'', v'')$};
-\end{tikzpicture}
-\end{center}
-
-Behavioral consistency (C2) applied to $e_1$ gives $a' = f_a(v, v')$.  Applied to $e_2$, it gives $a'' = f_{a'}(v', v'')$.  If we tried to describe the composite as a single event from $(a, v)$ to $(a'', v'')$, condition (C2) would require $a'' = f_a(v, v'')$.  But the actual value of $a''$ is
+\Cref{prop:parallel} shows that exchange events are closed under parallel composition.  They are \emph{not} closed under sequential composition in general. Suppose we have two events on the same agents and we attempt to compose them sequentially:
 \[
-f_{f_a(v,v')}(v', v''),
+\begin{tikzpicture}[oriented WD, bby=2.5ex, bbx=1.5cm, bb port sep=1, bb min width=1cm]
+  \node[bb={2}{2}] (E1) {$e_1$};
+  \node[bb={2}{2}, right=2 of E1] (E2) {$e_2$};
+  \draw (E1_in1) to +(-.4cm,0) node[left, font=\scriptsize] {$(a_1, v_1)$};
+  \draw (E1_in2) to +(-.4cm,0) node[left, font=\scriptsize] {$(a_2, v_2)$};
+  \draw (E1_out1) to node[above, font=\scriptsize] {$(a_1', v_1')$} (E2_in1);
+  \draw (E1_out2) to node[below, font=\scriptsize] {$(a_2', v_2')$} (E2_in2);
+  \draw (E2_out1) to +(.4cm,0) node[right, font=\scriptsize] {$(a_1'', v_1'')$};
+  \draw (E2_out2) to +(.4cm,0) node[right, font=\scriptsize] {$(a_2'', v_2'')$};
+\end{tikzpicture}
 \]
-which need not equal $f_a(v, v'')$.  Moreover, $(v, v'')$ may not even belong to $T_a$.
+Each event involves one update step from the coalgebras, whereas the proposed composite requires two steps. Indeed, if we tried to describe the composite as a single exchange event from $(a_i, v_i)$ to $(a_i'', v_i'')$, update consistency would require $a_i'' = f_{a_i}(v_i, v_i'')$ for each agent~$i$.  But the actual value is
+\[
+a_i'' \;=\; f_{a_i'}(v_i', v_i''),\where a_i'=f_{a_i}(v_i,v_i')
+\]
+and the required equation $a_i''=^?f_{a_i}(v_i, v_i'')$ may not hold. Similarly, $(v_i, v_i'')$ may not even belong to $T_{a_i}$, so trade willingness can also fail.
 
-\smallskip
-Concretely: Alice starts in \texttt{eager}; after $e_1$ she transitions to \texttt{cautious}, which has a different trade menu (buy up to 2 at $\leq\$98$ instead of up to 5 at $\leq\$102$).  A composite event from \texttt{eager} to the final state cannot be described as a single one-step event evaluated against the \texttt{eager} menu alone.
+Concretely: Alice and Bob trade in event $e_1$: Alice buys 3 shares at \$100 in state \texttt{eager} and transitions to \texttt{cautious}.  Then they trade again in event $e_2$, but now Alice's trade menu is different (buy up to 2 at $\leq\$98$ instead of up to 5 at $\leq\$102$).  No single event initiated when Alice's state is \texttt{eager} can capture this two-step history.
 
-\smallskip
-The free prop avoids this issue: every valid wiring of one-step events is a legitimate multi-step event, and no identifications are imposed.
-}}
+We therefore seek a categorical structure that accommodates both parallel and sequential composition of events, without requiring sequential composites to be one-step events.
+
+\begin{definition}[Prop graph]\label{def:prop-graph}
+A \emph{prop graph} consists of a set $C$ of \emph{colors}, a set $E$ of \emph{edges} equipped with a monoid structure $(E,\otimes,I_E)$, and source and target functions $s,t\colon E\to C^*$ that are monoid homomorphisms, where $C^*$ denotes the free monoid on~$C$.
+\end{definition}
+
+\begin{definition}[Prop]\label{def:prop}
+A \emph{prop} is a strict monoidal category whose monoid of objects is free.  Equivalently, it is a strict monoidal category $(C,\otimes,I)$ such that $(\ob(C),\otimes,I)$ is a free monoid on some set of colors.
+\end{definition}
+
+\begin{example}\label{ex:prop-graph}
+Exchange events form a prop graph $G_V$ with color set $\Set{Agent}$, edge set the class of exchange events, source and target maps reading off the input and output agent families, and edge monoid given by \cref{prop:parallel}.
+\end{example}
+
+Every prop has an underlying prop graph: take the colors to be the generating objects, the edges to be all morphisms, and the edge monoid to be $\otimes$ on morphisms.  In the other direction:
+
+\begin{theorem}[Free prop on a prop graph]\label{thm:free-prop}
+The forgetful functor from props to prop graphs has a left adjoint.  The \emph{free prop} $F(G)$ on a prop graph $G$ has object monoid $C^*$; its morphisms are equivalence classes of string diagrams built from the edges of $G$, where two diagrams are identified when they differ by the interchange law.  The monoidal product on generators in $F(G)$ agrees with the edge monoid of~$G$.
+\end{theorem}
+
+\begin{definition}[Event prop]\label{def:event-prop}
+The \emph{event prop} $\Event_V$ is the free prop on the prop graph $G_V$ of exchange events.  Its morphisms are multi-step trading histories: equivalence classes of string diagrams whose boxes are one-step exchange events.
+\end{definition}
+
+\noindent Every valid wiring of one-step events---sequential, parallel, or any combination---is a legitimate morphism in $\Event_V$, and no identifications beyond interchange are imposed.
 
 %% ===================================================================
 \section*{Markets via the event prop}
 %% ===================================================================
 
-The event prop $\Event_V$ contains all possible trading histories consistent with conservation and behavioral consistency---every way that agents could exchange resources, in any order, with any wiring.  Most of this is far too general to describe any particular economic setting.
+The event prop $\Event_V$ contains all possible trading histories consistent with value conservation, trade willingness, and update consistency---every way that agents could exchange resources, in any order, with any wiring.  Most of this is far too general to describe any particular economic setting.
 
 A \emph{market} should be some structured collection of events in $\Event_V$---the events that a particular mechanism permits.  The goal is to pick out collections corresponding to specific real-world markets, and to ask whether this framework can recover existing financial mathematics or reveal structure that was not visible before.
 
@@ -778,7 +802,7 @@ A \emph{stateful fill event} is defined just as before---a set of matched fills 
 
 Does the composition property still hold?  Not in general.  After a fill, an agent may transition to a state with different limit orders.  A fill that was valid against the old orders may not be valid against the new ones.  This is exactly the situation we encountered with the event prop: Alice in \texttt{eager} accepts trades that Alice in \texttt{cautious} does not.  A multi-step history through intermediate state changes cannot, in general, be collapsed to a single step.
 
-This begins to look like the event prop itself.  A stateful limit order agent is an $F_V$-coalgebra whose trade menus are restricted to limit-order-shaped trades: in each state, the set of acceptable portfolio swaps is exactly the set of fills of the limit order presented in that state.  The transition map sends each fill to the successor state.  Fill events satisfying conservation and behavioral consistency are generators of a prop---and because one-step events no longer compose, the right object is the free prop on these generators.
+This begins to look like the event prop itself.  A stateful limit order agent is an $F_V$-coalgebra whose trade menus are restricted to limit-order-shaped trades: in each state, the set of acceptable portfolio swaps is exactly the set of fills of the limit order presented in that state.  The transition map sends each fill to the successor state.  Fill events satisfying value conservation, trade willingness, and update consistency are generators of a prop---and because one-step events no longer compose, the right object is the free prop on these generators.
 
 \begin{remark}[The progression]
 Without state, limit order events compose trivially---everything collapses to a single step.  With state, they do not---and the resulting structure mirrors the event prop, restricted to agents whose preferences take the shape of limit orders.
@@ -793,11 +817,11 @@ The functor $F_V(A) = \sum_{T \subseteq V \times V} A^T$ does not appear to carr
 \end{question}
 
 \begin{question}
-Condition (C1) is a local, instantaneous conservation law.  It would only amount to a global conservation law if $V$ captured all resources in the economy.  What happens when multiple event props, over different portfolio spaces, interact?  Is there a meaningful notion of ``open system'' in which local conservation holds but global conservation can fail?
+Value conservation is a local, instantaneous conservation law.  It would only amount to a global conservation law if $V$ captured all resources in the economy.  What happens when multiple event props, over different portfolio spaces, interact?  Is there a meaningful notion of ``open system'' in which local conservation holds but global conservation can fail?
 \end{question}
 
 \begin{question}
-As noted in the categorical aside above, one-step events in $\Event_V$ are closed under sequential composition if and only if the coalgebra satisfies
+One-step events in $\Event_V$ are closed under sequential composition if and only if the coalgebra satisfies
 \[
 f_{f_a(v_1,v_2)}(v_2,v_3) \;=\; f_a(v_1,v_3)
 \]
@@ -811,6 +835,9 @@ What natural quotients of $\Event_V$ are economically meaningful?  Identifying m
 \begin{question}
 A stateful limit order agent determines an $F_V$-coalgebra with limit-order-shaped trade menus.  Is there a useful functor in the reverse direction---from general $F_V$-coalgebras to stateful limit order agents?  A coalgebraic agent may exhibit cyclic trade preferences (willing to trade $A \to B$, $B \to C$, $C \to A$) that no limit order can represent, suggesting no such functor exists in general.
 \end{question}
+
+\section*{Acknowledgments}
+The authors thank Andrea Abeje-Stine for interesting conversations.
 
 %% ===================================================================
 \section*{References}
