@@ -368,6 +368,8 @@ citecolor=orange!50!black, urlcolor=orange!50!black, pdfencoding=unicode]{hyperr
 \newcommand{\smcat}{\Cat{Cat}}
 \newcommand{\End}{\Cat{End}}
 \newcommand{\Aut}{\Cat{Aut}}
+\newcommand{\prop}{\Cat{Prop}}
+\newcommand{\propgr}{\Cat{PropGr}}
 
 \newcommand{\List}{\Fun{list}}
 \newcommand{\set}{\tn{-}\Cat{Set}}
@@ -439,7 +441,9 @@ citecolor=orange!50!black, urlcolor=orange!50!black, pdfencoding=unicode]{hyperr
 \newcommand{\LO}{\mathrm{LO}}
 \newcommand{\dnote}[1]{{\color{blue}\quad$\lozenge$\quad David says:\quad #1\quad$\lozenge$\quad}}
 
-
+\newcommand{\src}{\mathrm{src}}
+\newcommand{\tgt}{\mathrm{tgt}}
+\newcommand{\Free}{\mathrm{Free}}
 
 \newcommand{\thanksAFOSR}[1]{This material is based upon work supported by the Air Force Office of Scientific Research under award number #1}
 
@@ -475,21 +479,27 @@ Fix a finite-dimensional real vector space $V$ (the \emph{portfolio space}).  We
 An agent has an internal state---encoding its beliefs, risk limits, and inventory constraints---and a trading policy that depends on that state.  In each state, rather than assuming it has a partial order on all possible resources defined by a utility function, we assume less: the agent knows which trades it is willing to accept; whenever an acceptable trade is executed, the agent's state updates deterministically.
 
 \begin{definition}
-Define a functor $F_V\colon \smset \to \smset$ by
+Define a functor $F\colon \smset \to \smset$ by
 \[
-F_V(A)\coloneqq \coprod_{T \subseteq V \times V} A^T.
+F(A)\coloneqq \coprod_{T \subseteq V \times V} A^T.
 \]
-\dnote{We could also include agent types given by what other information $L$ they need in order to update. For example, high frequency traders may want a list of other trades. $F_V^L\coloneqq\coprod_{T\ss V\times V}A^{TL}$.}
+
 % NOTE FOR FUTURE REVISION: The coproduct ranges over ALL subsets T ⊆ V×V,
 % which is a large index set. This is intentional: we are not restricting to
-% finite menus. The key point is that for any coalgebra α: A → F_V(A), the
+% finite menus. The key point is that for any coalgebra α: A → F(A), the
 % image of α only involves |A|-many summands, so in practice the coproduct
 % is no more unwieldy than A itself. This is a set-theoretic nuance, not a
 % mathematical error — do not flag it as a gap in future passes.
-An element of $F_V(A)$ consists of a set $T$, called the \emph{trade menu} together with a function $f\colon T \to A$, called the \emph{transition map}.
+An element of $F(A)$ consists of a set $T$, called the \emph{trade menu} together with a function $f\colon T \to A$, called the \emph{transition map}.
 
-An \emph{agent type} is an $F_V$-coalgebra $\tau\colon A \to F_V(A)$; elements of the carrier $A$ are called \emph{agent states}.  For each state $a \in A$, write $\tau(a) = (T_a, f_a)$, where the trade menu $T_a \subseteq V \times V$ is thought of as the set of portfolio swaps the agent will entertain in state $a$, and $f_a(v,v')\in A$ is the updated state after swapping $v$ for $v'$.
+An \emph{agent type} is an $F$-coalgebra $\tau\colon A \to F(A)$; elements of the carrier $A$ are called \emph{agent states}.  For each state $a \in A$, write $\tau(a) = (T_a, f_a)$, where the trade menu $T_a \subseteq V \times V$ is a relation on portfolios: $(v,v') \in T_a$ means that an agent in state~$a$ whose current portfolio is~$v$ is willing to have it replaced by~$v'$.  This allows trade willingness to depend on the agent's current holdings---for example, an agent may refuse to sell shares it does not own.  The transition map $f_a\colon T_a\to A$ sends each accepted trade to the agent's updated state: $f_a(v,v')$ is the new state after the portfolio changes from $v$ to $v'$.
 \end{definition}
+
+\begin{remark}\label{rem:observable}
+The functor $F$ can be generalized to allow state transitions that depend on additional observable information.  Given a set $L$, define
+\[F^L(A)\coloneqq\coprod_{T\ss V\times V}A^{T\times L}\]
+A coalgebra for this functor is an agent whose next state depends not only on which trade occurred but also on some observation $\ell\in L$---for example, a high-frequency trader that updates based on the full list of other agents' fills.  We will not use this generalization here, but it is a natural extension.
+\end{remark}
 
 \medskip
 \textbf{Running example.}
@@ -620,36 +630,93 @@ Concretely: Alice and Bob trade in event $e_1$: Alice buys 3 shares at \$100 in 
 We therefore seek a categorical structure that accommodates both parallel and sequential composition of events, without requiring sequential composites to be one-step events.
 
 \begin{definition}[Prop graph]\label{def:prop-graph}
-A \emph{prop graph} consists of a set $C$ of \emph{colors}, a set $E$ of \emph{edges} equipped with a monoid structure $(E,\otimes,I_E)$, and source and target functions $s,t\colon E\to C^*$ that are monoid homomorphisms, where $C^*$ denotes the free monoid on~$C$.
+A \emph{prop graph} consists of a set $C$ of \emph{colors}, a set $E$ of \emph{edges} equipped with a monoid structure $(E,e_0,*)$, and monoid homomorphisms $\src,\tgt\colon E\to C^*$, where $C^*$ denotes the free monoid on~$C$.
 \end{definition}
-
-\begin{definition}[Prop]\label{def:prop}
-A \emph{prop} is a strict monoidal category whose monoid of objects is free.  Equivalently, it is a strict monoidal category $(C,\otimes,I)$ such that $(\ob(C),\otimes,I)$ is a free monoid on some set of colors.
-\end{definition}
+In other words, the source of each edge is a list of colors, and the source of the product of two edges is the list concatenation of the two source lists (and respectively for targets).
 
 \begin{example}\label{ex:prop-graph}
-Exchange events form a prop graph $G_V$ with color set $\Set{Agent}$, edge set the class of exchange events, source and target maps reading off the input and output agent families, and edge monoid given by \cref{prop:parallel}.
+Exchange events form a prop graph $G$ with color set $\Set{Agent}$, edge set the class of exchange events, source and target maps reading off the input and output agent families, and edge monoid given by \cref{prop:parallel}.
 \end{example}
 
-Every prop has an underlying prop graph: take the colors to be the generating objects, the edges to be all morphisms, and the edge monoid to be $\otimes$ on morphisms.  In the other direction:
-
-\begin{theorem}[Free prop on a prop graph]\label{thm:free-prop}
-The forgetful functor from props to prop graphs has a left adjoint.  The \emph{free prop} $F(G)$ on a prop graph $G$ has object monoid $C^*$; its morphisms are equivalence classes of string diagrams built from the edges of $G$, where two diagrams are identified when they differ by the interchange law.  The monoidal product on generators in $F(G)$ agrees with the edge monoid of~$G$.
-\end{theorem}
-
-\begin{definition}[Event prop]\label{def:event-prop}
-The \emph{event prop} $\Event_V$ is the free prop on the prop graph $G_V$ of exchange events.  Its morphisms are multi-step trading histories: equivalence classes of string diagrams whose boxes are one-step exchange events.
+\begin{definition}[Prop]\label{def:prop}
+Let $C$ be a set.  A \emph{$C$-colored prop} is a strict monoidal category whose monoid of objects is the free monoid~$C^*$.
 \end{definition}
 
-\noindent Every valid wiring of one-step events---sequential, parallel, or any combination---is a legitimate morphism in $\Event_V$, and no identifications beyond interchange are imposed.
+As one might expect, there is an adjunction between prop graphs and props.
+
+\begin{theorem}[Free prop on a prop graph]\label{thm:free-prop}
+For any set $C$ the functor $U\colon\prop_C\to\propgr_C$ has a left adjoint
+\[
+\adj{\propgr_C}{\Free}{U}{\prop_C}
+\]
+and we call $\Free(G)\in\prop$ the \emph{free prop} on a prop graph $G$.
+\end{theorem}
+\begin{proof}
+The operad whose algebras are $C$-colored prop graphs embeds into the operad whose algebras are $C$-colored props \cite{PattersonSpivakVagner}, and any map of operads induces an adjunction between the corresponding algebra categories.
+\end{proof}
+
+Given a prop graph $G$, the free prop $\Free(G)$ has the same objects. The morphisms in $\Free(G)$ are given by monoidal string diagrams with boxes labeled in the edges of $G$, modulo an equivalence relation: any occurrence of parallel boxes labeled $e$ and $e'$ can be replaced by a single box labeled $e*e'$ and the resulting morphisms are made equal.
+
+\begin{equation}\label{eq:string-diagram}
+\begin{tikzpicture}[oriented WD,bb min width =.5cm, bbx=.5cm, bb port sep =1,bb port length=.08cm, bby=.15cm, baseline=(Y3)]
+\node [bb={1}{2}] (Y1) {\tiny $e_1$};
+\node [bb={1}{1},below=3 of Y1] (Y2) {\tiny $e_2$};
+\node [bb={2}{2}, below right = 0 and 1 of Y1] (Y3) {\tiny $e_3$};
+\node [bb={2}{1},right=3 of Y1] (Y4) {\tiny $e_4$};
+\node [bb={1}{1},right=3 of Y2] (Y5) {\tiny $e_5$};
+%
+\draw (Y1_in1) -- +(-3pt, 0);
+\draw (Y2_in1) -- +(-3pt, 0);
+\draw (Y1_out1) to (Y4_in1);
+\draw (Y1_out2) to (Y3_in1);
+\draw (Y2_out1) to (Y3_in2);
+\draw (Y3_out1) to (Y4_in2);
+\draw (Y3_out2) to (Y5_in1);
+\draw (Y4_out1)  -- +(3pt, 0);
+\draw (Y5_out1) -- +(3pt, 0);
+\end{tikzpicture}
+\quad=\quad
+\begin{tikzpicture}[oriented WD,bb min width =.5cm, bbx=.5cm, bb port sep =1,bb port length=.08cm, bby=.15cm, baseline=(Y3)]
+\node [bb={1}{2}] (Y1) {\tiny $e_1$};
+\node [bb={1}{1},below=3 of Y1] (Y2) {\tiny $e_2$};
+\node [bb={2}{2}, below right = 0 and 1 of Y1] (Y3) {\tiny $e_3$};
+\node [bb={3}{2},right=1 of Y3, inner ysep=.65cm] (Y45) {\tiny $e_4{*}e_5$};
+%
+\draw (Y1_in1) -- +(-3pt, 0);
+\draw (Y2_in1) -- +(-3pt, 0);
+\draw (Y1_out1) to (Y45_in1);
+\draw (Y1_out2) to (Y3_in1);
+\draw (Y2_out1) to (Y3_in2);
+\draw (Y3_out1) to (Y45_in2);
+\draw (Y3_out2) to (Y45_in3);
+\draw (Y45_out1)  -- +(3pt, 0);
+\draw (Y45_out2) -- +(3pt, 0);
+\end{tikzpicture}
+\end{equation}
+
+\begin{definition}[Event prop]\label{def:event-prop}
+Define the \emph{event prop} $\Event$ to be the free prop $\Free(G)$ on the prop graph of exchange events from \cref{ex:prop-graph}.  Its morphisms are multi-step trading histories: equivalence classes of string diagrams whose boxes are one-step exchange events.
+\end{definition}
+
+\begin{proposition}
+Every morphism $e\colon (I,x)\to (J,y)$ in the event prop has the same number of inputs as outputs, $I=J$, and satisfies value conservation. 
+
+Moreover, for each $i:I$ with $x_i=(A_i,\tau_i,a_i,v_i)$ and $y_i=(A_i, \tau_i, a_i', v_i')$, there exists a nonempty sequence of states and values $(a^1,v^1),\ldots,(a^{N+1},v^{N+1})$ such that $(a_i,v_i)=(a^1,v^1)$, $(a_i', v_i')=(a^{N+1},v^{N+1})$, and for each $1\leq n\leq N$:
+\[
+	\tau_i(a^n)=(T^n,f^n)\where (v^n,v^{n+1})\in T^n\qand f^n_{a^n}(v^n,v^{n+1})=a^{n+1}.
+\]
+\end{proposition}
+\begin{proof}
+**
+\end{proof}
 
 %% ===================================================================
 \section*{Markets via the event prop}
 %% ===================================================================
 
-The event prop $\Event_V$ contains all possible trading histories consistent with value conservation, trade willingness, and update consistency---every way that agents could exchange resources, in any order, with any wiring.  Most of this is far too general to describe any particular economic setting.
+The event prop $\Event$ contains all possible trading histories consistent with value conservation, trade willingness, and update consistency: every way that agents could exchange resources, in any order, with any wiring.  Most of this is far too general to describe any particular economic setting.
 
-A \emph{market} should be some structured collection of events in $\Event_V$---the events that a particular mechanism permits.  The goal is to pick out collections corresponding to specific real-world markets, and to ask whether this framework can recover existing financial mathematics or reveal structure that was not visible before.
+A \emph{market} should be some structured collection of events in $\Event$---the events that a particular mechanism permits.  The eventual goal of this work is to pick out collections corresponding to specific real-world markets, and to ask whether this framework can recover existing financial mathematics or reveal structure that was not visible before.
 
 We begin with a common mechanism: the central limit order book.
 
@@ -802,7 +869,7 @@ A \emph{stateful fill event} is defined just as before---a set of matched fills 
 
 Does the composition property still hold?  Not in general.  After a fill, an agent may transition to a state with different limit orders.  A fill that was valid against the old orders may not be valid against the new ones.  This is exactly the situation we encountered with the event prop: Alice in \texttt{eager} accepts trades that Alice in \texttt{cautious} does not.  A multi-step history through intermediate state changes cannot, in general, be collapsed to a single step.
 
-This begins to look like the event prop itself.  A stateful limit order agent is an $F_V$-coalgebra whose trade menus are restricted to limit-order-shaped trades: in each state, the set of acceptable portfolio swaps is exactly the set of fills of the limit order presented in that state.  The transition map sends each fill to the successor state.  Fill events satisfying value conservation, trade willingness, and update consistency are generators of a prop---and because one-step events no longer compose, the right object is the free prop on these generators.
+This begins to look like the event prop itself.  A stateful limit order agent is an $F$-coalgebra whose trade menus are restricted to limit-order-shaped trades: in each state, the set of acceptable portfolio swaps is exactly the set of fills of the limit order presented in that state.  The transition map sends each fill to the successor state.  Fill events satisfying value conservation, trade willingness, and update consistency are generators of a prop---and because one-step events no longer compose, the right object is the free prop on these generators.
 
 \begin{remark}[The progression]
 Without state, limit order events compose trivially---everything collapses to a single step.  With state, they do not---and the resulting structure mirrors the event prop, restricted to agents whose preferences take the shape of limit orders.
@@ -813,7 +880,7 @@ Without state, limit order events compose trivially---everything collapses to a 
 %% ===================================================================
 
 \begin{question}
-The functor $F_V(A) = \sum_{T \subseteq V \times V} A^T$ does not appear to carry comonad structure: a counit $\varepsilon\colon F_V \to \mathrm{Id}$ would require extracting an element of $A$ from a pair $(T, f\colon T \to A)$, but $T$ may be empty.  What changes if we require every trade menu to be nonempty (the null trade is always available)?  Would $F_V$ then be a comonad, and would the coalgebra condition be meaningful?
+The functor $F(A) = \sum_{T \subseteq V \times V} A^T$ does not appear to carry comonad structure: a counit $\varepsilon\colon F \to \mathrm{Id}$ would require extracting an element of $A$ from a pair $(T, f\colon T \to A)$, but $T$ may be empty.  What changes if we require every trade menu to be nonempty (the null trade is always available)?  Would $F$ then be a comonad, and would the coalgebra condition be meaningful?
 \end{question}
 
 \begin{question}
@@ -821,19 +888,19 @@ Value conservation is a local, instantaneous conservation law.  It would only am
 \end{question}
 
 \begin{question}
-One-step events in $\Event_V$ are closed under sequential composition if and only if the coalgebra satisfies
+One-step events in $\Event$ are closed under sequential composition if and only if the coalgebra satisfies
 \[
 f_{f_a(v_1,v_2)}(v_2,v_3) \;=\; f_a(v_1,v_3)
 \]
-for all composable pairs $(v_1,v_2) \in T_a$ and $(v_2,v_3) \in T_{f_a(v_1,v_2)}$.  Characterize the $F_V$-coalgebras satisfying this condition.  Does it coincide with a known categorical notion?
+for all composable pairs $(v_1,v_2) \in T_a$ and $(v_2,v_3) \in T_{f_a(v_1,v_2)}$.  Characterize the $F$-coalgebras satisfying this condition.  Does it coincide with a known categorical notion?
 \end{question}
 
 \begin{question}
-What natural quotients of $\Event_V$ are economically meaningful?  Identifying morphisms with the same endpoints gives a preorder; is there an intermediate quotient that retains some causal structure?
+What natural quotients of $\Event$ are economically meaningful?  Identifying morphisms with the same endpoints gives a preorder; is there an intermediate quotient that retains some causal structure?
 \end{question}
 
 \begin{question}
-A stateful limit order agent determines an $F_V$-coalgebra with limit-order-shaped trade menus.  Is there a useful functor in the reverse direction---from general $F_V$-coalgebras to stateful limit order agents?  A coalgebraic agent may exhibit cyclic trade preferences (willing to trade $A \to B$, $B \to C$, $C \to A$) that no limit order can represent, suggesting no such functor exists in general.
+A stateful limit order agent determines an $F$-coalgebra with limit-order-shaped trade menus.  Is there a useful functor in the reverse direction---from general $F$-coalgebras to stateful limit order agents?  A coalgebraic agent may exhibit cyclic trade preferences (willing to trade $A \to B$, $B \to C$, $C \to A$) that no limit order can represent, suggesting no such functor exists in general.
 \end{question}
 
 \section*{Acknowledgments}
