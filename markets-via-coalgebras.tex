@@ -565,6 +565,11 @@ if three conditions hold
 where $(T_i,f_i)\coloneqq\tau_i(a_i)$ for each $i$.
 \end{definition}
 
+\mygreen{Note: Some markets charge a fee, or even destroy assets, which seems to violate conservation; but these can be modeled via Conservation by including extra agents that "belong to market" or that ``take ownership" of destroyed assets, as happens explicitly on the Ethereum network.}
+
+\mygreen{Note: This conservation law is local, and does not imply a global conservation of value.}
+
+
 \begin{example}\label{ex:event}
 Alice is in state \texttt{eager} with portfolio $v_A = (1000, 0)$; Bob is in state \texttt{hold} with $v_B = (200, 20)$.  An event in which Alice buys 3 shares from Bob at \$100 each:
 
@@ -719,6 +724,8 @@ The event prop $\Event$ contains all possible trading histories consistent with 
 A \emph{market} should be some structured collection of events in $\Event$---the events that a particular mechanism permits.  The eventual goal of this work is to pick out collections corresponding to specific real-world markets, and to ask whether this framework can recover existing financial mathematics or reveal structure that was not visible before.
 
 We begin with a common mechanism: the central limit order book.
+
+\mygreen{Is the plan for Friday to discuss how to make CLOB into an example, or how to define ``a market" using the Event prop? I would love to have your help identifying avenues for defining / experimenting with equilibria.}
 
 %% ===================================================================
 \section*{Limit order events}
