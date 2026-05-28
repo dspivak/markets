@@ -317,6 +317,7 @@ citecolor=orange!50!black, urlcolor=orange!50!black, pdfencoding=unicode]{hyperr
 
 \newcommand{\id}{\mathrm{id}}
 \newcommand{\then}{\mathbin{\fatsemi}}
+\newcommand{\trd}{\mathrm{tr}}
 
 \newcommand{\cocolon}{:\!}
 
@@ -476,12 +477,18 @@ Fix a finite-dimensional real vector space $V$ (the \emph{portfolio space}).  We
 %% ===================================================================
 
 \textbf{Informal picture.}
-An agent has an internal state---encoding its beliefs, risk limits, and inventory constraints---and a trading policy that depends on that state.  In each state, rather than assuming it has a partial order on all possible resources defined by a utility function, we assume less: the agent knows which trades it is willing to accept; whenever an acceptable trade is executed, the agent's state updates deterministically.
+An agent has an internal state---encoding its beliefs, risk limits, and inventory constraints---and a trading policy that depends on that state.  In each state, rather than assuming it has a partial order on all possible resources defined by a utility function, we assume less: the agent knows which trades it is willing to accept; whenever an acceptable trade is executed, the agent's state updates deterministically according to the information made available by the event.
 
 \begin{definition}
+Fix an \emph{update-direction assignment}: for every trade menu $T\subseteq V\times V$, a set $D_T$ of update directions, a subset $D_T^{\trd}\subseteq D_T$ of trade directions, and a function
+\[
+\pi_T\colon D_T^{\trd}\to T
+\]
+which sends a trade direction to the underlying portfolio replacement that it realizes.
+
 Define a functor $F\colon \smset \to \smset$ by
 \[
-F(A)\coloneqq \coprod_{T \subseteq V \times V} A^T.
+F(A)\coloneqq \coprod_{T \subseteq V \times V} A^{D_T}.
 \]
 
 % NOTE FOR FUTURE REVISION: The coproduct ranges over ALL subsets T ⊆ V×V,
@@ -490,19 +497,22 @@ F(A)\coloneqq \coprod_{T \subseteq V \times V} A^T.
 % image of α only involves |A|-many summands, so in practice the coproduct
 % is no more unwieldy than A itself. This is a set-theoretic nuance, not a
 % mathematical error — do not flag it as a gap in future passes.
-An element of $F(A)$ consists of a set $T$, called the \emph{trade menu} together with a function $f\colon T \to A$, called the \emph{transition map}.
+An element of $F(A)$ consists of a set $T$, called the \emph{trade menu}, together with a function $f\colon D_T \to A$, called the \emph{transition map}.
 
-An \emph{agent type} is an $F$-coalgebra $\tau\colon A \to F(A)$; elements of the carrier $A$ are called \emph{agent states}.  For each state $a \in A$, write $\tau(a) = (T_a, f_a)$, where the trade menu $T_a \subseteq V \times V$ is a relation on portfolios: $(v,v') \in T_a$ means that an agent in state~$a$ whose current portfolio is~$v$ is willing to have it replaced by~$v'$.  This allows trade willingness to depend on the agent's current holdings---for example, an agent may refuse to sell shares it does not own.  The transition map $f_a\colon T_a\to A$ sends each accepted trade to the agent's updated state: $f_a(v,v')$ is the new state after the portfolio changes from $v$ to $v'$.
+An \emph{agent type} is an $F$-coalgebra $\tau\colon A \to F(A)$; elements of the carrier $A$ are called \emph{agent states}.  For each state $a \in A$, write $\tau(a) = (T_a, f_a)$, where the trade menu $T_a \subseteq V \times V$ is a relation on portfolios: $(v,v') \in T_a$ means that an agent in state~$a$ whose current portfolio is~$v$ is willing to have it replaced by~$v'$.  This allows trade willingness to depend on the agent's current holdings---for example, an agent may refuse to sell shares it does not own.  The transition map $f_a\colon D_{T_a}\to A$ sends each update direction to the agent's updated state.  If $d\in D_{T_a}^{\trd}$ and $\pi_{T_a}(d)=(v,v')$, then $f_a(d)$ is the new state after the portfolio changes from $v$ to $v'$ with update information $d$.
 \end{definition}
 
 \begin{remark}\label{rem:observable}
-The functor $F$ can be generalized to allow state transitions that depend on additional observable information.  Given a set $L$, define
-\[F^L(A)\coloneqq\coprod_{T\ss V\times V}A^{T\times L}\]
-A coalgebra for this functor is an agent whose next state depends not only on which trade occurred but also on some observation $\ell\in L$---for example, a high-frequency trader that updates based on the full list of other agents' fills.  We will not use this generalization here, but it is a natural extension.
+The original model is recovered by taking $D_T^{\trd}=D_T=T$ and $\pi_T=\id_T$ for every trade menu $T$.  A useful generalization is
+\[
+D_T=T\times X+W,\qquad D_T^{\trd}=T\times X,\qquad \pi_T(t,x)=t.
+\]
+Here $x\in X$ is local information attached to an executed trade---for example, execution details, counterparty information, or an order-book observation---while $w\in W$ is a global update direction not tied to a particular trade, such as news, a clock tick, or an external price signal.
 \end{remark}
 
 \medskip
 \textbf{Running example.}
+For the running example, take the original choice $D_T=T$, so the transition map may be written as $f_a(v,v')$.
 Let $V = \mathbb{R}^2$ with coordinates $(c, q)$, where $c$ is cash and $q$ is the quantity of one asset.  Consider two agents, Alice and Bob, with initial portfolios $v_A = (1000, 0)$ and $v_B = (200, 20)$.
 
 \medskip
@@ -552,17 +562,16 @@ Let $\Set{Agent}$ denote the class of all tuples $(A, \tau, a, v)$ consisting of
   \node[above right=-9pt and 0] at ($(E_out1)!.5!(E_out2)$) {$\vdots$};
 \end{tikzpicture}
 \]
-There will be three conditions for this to be a valid event, namely that there is no overall change in the amount of assets, that each agent was willing to make the trade that occurred, and that each agent updated to a new state consistent with their coalgebra structure.
+There will be three conditions for this to be a valid event, namely that there is no overall change in the amount of assets, that each agent was willing to make the trade that occurred, and that each agent updated to a new state consistent with its coalgebra structure and the update direction supplied by the event.
 \begin{definition}
-Let $x,x'\colon I\to\Set{Agent}$ with $x(i)=(A_i,\tau_i,a_i,v_i)$ and $x'(i)=(A_i,\tau_i,a_i',v_i')$ for each $i\in I$. There exists an \emph{exchange event}
+Let $x,x'\colon I\to\Set{Agent}$ with $x(i)=(A_i,\tau_i,a_i,v_i)$ and $x'(i)=(A_i,\tau_i,a_i',v_i')$ for each $i\in I$, and write $(T_i,f_i)\coloneqq\tau_i(a_i)$.  An \emph{exchange event}
 \[e\colon x\to x'\]
-if three conditions hold
+consists of directions $d_i\in D_{T_i}^{\trd}$ for each $i\in I$ such that three conditions hold:
 \begin{description}
 	\item[\quad Value conservation:] $\sum_{i\in I} v_i=\sum_{i\in I}v_i'$
-	\item[\quad Trade willingness:] $(v_i,v_i')\in T_i$, for each $i$, and
-	\item[\quad Update consistency:] $f_i(v_i,v_i')=a_i'$, for each $i$.
+	\item[\quad Trade realization:] $\pi_{T_i}(d_i)=(v_i,v_i')$, for each $i$, and
+	\item[\quad Update consistency:] $f_i(d_i)=a_i'$, for each $i$.
 \end{description}
-where $(T_i,f_i)\coloneqq\tau_i(a_i)$ for each $i$.
 \end{definition}
 
 \mygreen{Note: Some markets charge a fee, or even destroy assets, which seems to violate conservation; but these can be modeled via Conservation by including extra agents that "belong to market" or that ``take ownership" of destroyed assets, as happens explicitly on the Ethereum network.}
@@ -599,6 +608,238 @@ Alice is in state \texttt{eager} with portfolio $v_A = (1000, 0)$; Bob is in sta
 \end{itemize}
 \end{example}
 
+%% ===================================================================
+\section*{Markets as Agents}
+%% ===================================================================
+
+Participants often reason about a market as though it has internal state and repeatable behavior: given exposed menus, it selects trades, supplies observations, and changes what it will do next.  This may describe an actual mechanism, such as an algorithmic exchange, or it may be a useful fiction induced by participants' modeling of the aggregate system.  The purpose of this section is to make that market-agent an object.  After recalling notation for polynomial functors on $\smset$, we use the tensor product in $\poly$ to package the finite participant context exposed to a market, and the internal hom into $\yon$ --- the dual --- to package the market's response rule.  The market-agent is then a coalgebra for the resulting polynomial, in direct parallel with the single-agent case.
+
+\subsubsection*{Polynomial preliminaries}
+
+This subsection fixes notation for $\poly$ and introduces the four constructions used throughout this section: the underlying notation $p=\sum_{i:p(1)}\yon^{p[i]}$ for polynomial functors, the tensor product $\otimes$ used to package finite participant contexts, the internal hom $[-,-]$ used to curry the agent definition, and the dual $(-)^\vee$ used to package the market-agent's response rule.
+
+\emph{Objects of $\poly$.}  An object of the category $\poly$ is a functor built from sums of representable functors, and we write it as
+\[
+p=\sum_{i:p(1)}\yon^{p[i]}.
+\]
+The set $p(1)$ is called the set of \emph{places} or \emph{positions} of $p$.  For a place $i:p(1)$, the set $p[i]$ is called the set of \emph{directions} at $i$.  Evaluating $p$ at a set $A$ gives
+\[
+p(A)\cong \sum_{i:p(1)}A^{p[i]}.
+\]
+Thus an element of $p(A)$ is a position together with an $A$-labeled response to every direction available there.
+
+\emph{Maps in $\poly$.}  A map $p\to q$ is a natural transformation of functors.  Evaluating at $1$ gives its forward action on positions, $p(1)\to q(1)$; once a position $i$ of $p$ is sent to a position $j$ of $q$, the component over that summand is a natural transformation $\yon^{p[i]}\to\yon^{q[j]}$, which by the Yoneda lemma is a map $q[j]\to p[i]$ of direction sets.  Thus maps in $\poly$ send positions forward and directions backward:
+\[
+\poly(p,q)\cong
+\prod_{i:p(1)}\sum_{j:q(1)}p[i]^{q[j]}.
+\]
+We will also use the form in which each function $q[j]\to p[i]$ from $q$-directions to $p$-directions is spelled out as a product over its inputs:
+\[
+\poly(p,q)\cong
+\prod_{i:p(1)}\sum_{j:q(1)}
+\prod_{d\in q[j]}\sum_{e\in p[i]}1.
+\]
+The trailing $1$ records that there is no further data once a $p$-direction $e$ has been chosen for each $q$-direction $d$.  The internal hom below is obtained by promoting that $1$ to a representable.
+
+\emph{Tensor product.}  The tensor product puts two polynomials side by side:
+\[
+p\otimes q
+\coloneqq
+\sum_{\substack{i:p(1)\\ j:q(1)}}\yon^{p[i]q[j]}.
+\]
+A place of $p\otimes q$ is a pair $(i,j)$ of places, and a direction at $(i,j)$ is a pair $(d_i,d_j)$ of directions, one at $i$ and one at $j$.  Iterating gives the tensor power $p^{\otimes n}$, used below to package $n$ exposed menus at once.
+
+\emph{Internal hom $[p,q]$.}  We want a polynomial $[p,q]$ whose positions are the maps $p\to q$ in $\poly$ and whose directions, at each such position, record which piece of map-data is being queried.  Starting from the second form of $\poly(p,q)$ above, the move is to replace the trailing singleton $1$ by the representable $\yon$, so that each $(d,e)$ choice contributes one direction rather than no data:
+\[
+[p,q]\cong
+\prod_{i:p(1)}\sum_{j:q(1)}
+\prod_{d\in q[j]}\sum_{e\in p[i]}\yon.
+\]
+Distributing products over sums puts this in polynomial normal form:
+\[
+[p,q]
+\coloneqq
+\sum_{\varphi\in\prod_{i:p(1)}\sum_{j:q(1)}p[i]^{q[j]}}
+\yon^{\sum_{i:p(1)}q[\varphi(i)]},
+\]
+where if $\varphi(i)=(j_i,\beta_i)$ then $q[\varphi(i)]$ means $q[j_i]$.  Informally: \emph{a position of $[p,q]$ assigns, to each place $i$ of $p$, a place $j_i$ of $q$ together with an answer in $p[i]$ to every direction of $q$ at $j_i$; a direction of $[p,q]$ names a place $i$ of $p$ together with one such $q$-direction at $j_i$.}
+
+\emph{Dual.}  The dual $p^\vee$ packages a \emph{response rule} to $p$: a way of answering every position $i$ of $p$ with one of its own directions, without committing to any output polynomial.  It is the special case of the internal hom in which the output is $\yon$:
+\[
+p^\vee\coloneqq [p,\yon].
+\]
+Since $\yon$ has one place and one direction, substituting $q=\yon$ in the formula for $[p,q]$ collapses three pieces of the position data.  The choice $\sum_{j:q(1)}$ becomes a singleton (there is no $q$-place to choose).  The product $\prod_{d\in q[j]}$ becomes a singleton (there is no $q$-direction to answer for).  What remains of a position is a single element of $p[i]$ for each $i$ --- i.e.\ an element $\varepsilon\in\prod_{i:p(1)} p[i]$.  The exponent likewise collapses: $\sum_{i:p(1)} q[\varphi(i)] = \sum_{i:p(1)} 1 = p(1)$.  This gives
+\[
+p^\vee\cong
+\sum_{\varepsilon\in\prod_{i:p(1)}p[i]}\yon^{p(1)}.
+\]
+Read in parallel with the internal-hom gloss above: \emph{a position of $p^\vee$ assigns, to each place $i$ of $p$, a single direction of $p$ --- there is no $q$-place to choose and no $q$-direction to answer for; a direction of $p^\vee$ names the place $i$ being answered.}  This is the event-side construction we need: it packages a rule for responding to any possible agent-side position.
+
+\subsubsection*{Agents without portfolio}
+
+This subsection develops the single-agent base case; in \emph{The market-agent polynomial} below, tensoring this object with itself and dualizing produces the market-agent.  Of the four constructions from \emph{Polynomial preliminaries}, only the internal hom enters here; the tensor and dual appear in the next subsection.
+
+Throughout this section, assume the resource set carries the structure of a commutative monoid $(R,+,0)$, so that holdings combine additively.  The default mental picture is the free commutative monoid on a set of named resources: each holding is a finite formal sum $\sum_i n_i r_i$ with non-negative integer multiplicities $n_i$.  Taking $R$ to be a group instead introduces negative elements, which model idealized debt.  Taking rational coefficients allows fractional holdings for all assets in every trade scenario.  For a set $X$ of local event observations, define
+\[
+P_X \coloneqq \sum_{T\subseteq R\times R} \yon^{T X}.
+\]
+Here juxtaposition $TX$ in the exponent denotes the cartesian product $T\times X$; we use this convention for products of direction sets throughout.  A place of $P_X$ is a trade menu $T\subseteq R\times R$.  The directions at that menu are $T X$: an acceptable trade together with a local observation.  This is the concrete trade-local case of the update-direction assignment above, with the global $W$-directions suppressed.
+
+For any set $A$, the polynomial $A\yon^A$ has position set $A$ and constant direction set $A$ at every position.  A coalgebra $A\yon^A \to p$ is, by direct evaluation at $A$, a function $A \to p(A)$.  The Definition below records the unpacking for $p = P_X$: each state $a\in A$ becomes a choice of trade menu and an update map into $A$.
+
+\begin{definition}[Agent without portfolio]\label{def:agent-without-portfolio}
+An \emph{agent without portfolio} is a coalgebra
+\[
+A\yon^A\to P_X.
+\]
+Equivalently, regarding $A$ as a constant polynomial, this can be curried as a map
+\[
+\yon^A\to [A,P_X].
+\]
+Evaluating the internal hom at $A$ collapses the curried form:
+\[
+[A,P_X](A) \cong P_X(A)^A.
+\]
+Unfolding $P_X(A) = \sum_{T\subseteq R\times R} A^{T X}$ and distributing over the $A$-indexed product gives the concrete description
+\[
+P_X(A)^A \cong \prod_{a\in A}\sum_{T\subseteq R\times R}A^{T X}.
+\]
+Thus each state $a\in A$ chooses a trade menu $T_a\subseteq R\times R$ and an update map
+\[
+T_a X\to A.
+\]
+The name \emph{without portfolio} records that no current holding $r \in R$ is part of the agent state: $A$ stores only the agent's internal state, and the menu $T_a$ lists candidate resource replacements without specifying which holding the agent currently has.  The directions in $T_a X$, written $(t,x)$, encode an executed trade $t$ together with the agent's local observation $x$.
+\end{definition}
+
+\begin{example}\label{ex:agent-without-portfolio}
+Take $X = 1$, so each direction is a trade alone.  Alice from Example~\ref{ex:event} becomes an agent-without-portfolio with state set $A_{\mathrm{Alice}} = \{\texttt{eager}, \texttt{cautious}\}$, menus $T_{\texttt{eager}}$ (buy up to 5 shares at $\leq \$102$) and $T_{\texttt{cautious}}$ (buy up to 2 shares at $\leq \$98$), and update maps $T_a \to A_{\mathrm{Alice}}$ sending every direction to $\texttt{cautious}$.  Bob has state set $\{\texttt{hold}\}$, single menu $T_{\texttt{hold}}$ (sell up to 10 shares at $\geq \$100$), and update returning to $\texttt{hold}$.  The portfolios $(1000,0)$ and $(200,20)$ live outside the state sets; events act on them.  Example~\ref{ex:market-agent} below extends this picture to a market-agent producing the event of Example~\ref{ex:event}.
+\end{example}
+
+\subsubsection*{The market-agent polynomial}
+
+Two moves lift the construction from a single agent to a market-agent: the tensor product in $\poly$ packages the finite participant context exposed to the market, and the dual packages the market's response rule.  We do the first move here and the second in the Definition below.
+
+A market mediates many exposed menus at once, so we package arbitrary finite participant contexts in a single polynomial:
+\[
+P_X^{\mathrm{fin}}\coloneqq\sum_{n\in\nn}P_X^{\otimes n}.
+\]
+The superscript $\mathrm{fin}$ records that we sum over all finite arities, so a single object holds every $n$-participant context at once.  Using the tensor formula gives
+\[
+P_X^{\mathrm{fin}}
+\cong
+\sum_{n\in\nn}
+\sum_{T_1,\ldots,T_n\subseteq R\times R}
+\yon^{T_1X\cdots T_nX}.
+\]
+A place is a finite list of menus, one for each participant, and a direction at that place chooses one trade-and-observation pair for each participant.\footnote{One could allow the $i$th participant to have its own local type $X_i$; we keep a single $X$ since heterogeneous local vocabularies can be folded into a larger common observation type when needed.}
+
+Applying the dual $(-)^\vee$ to $P_X^{\mathrm{fin}}$ packages a response rule for every finite context: a way of selecting, from each $n$-tuple of exposed menus, an $n$-tuple of trade-and-observation pairs.  A market agent is then the stateful object participants implicitly posit when they ask what the market will do with the exposed menus.
+
+\begin{definition}[Market agent]\label{def:market-agent}
+A \emph{market agent} is a coalgebra
+\[
+M\yon^M\to (P_X^{\mathrm{fin}})^\vee.
+\]
+An element $m\in M$ is a market state.  Unwinding the dual, the state $m$ determines a response rule
+\[
+\epsilon_m\in
+\prod_{\substack{n\in\nn\\ T_1,\ldots,T_n\subseteq R\times R}}
+T_1X\cdots T_nX,
+\]
+i.e.\ for each finite list of trade menus $(T_1,\ldots,T_n)$, the market picks a particular trade $t_i\in T_i$ inside each menu together with the local observation $x_i$ associated to that trade; the resulting tuple is $\epsilon_m(T_1,\ldots,T_n)=((t_1,x_1),\ldots,(t_n,x_n))$.  The state $m$ also specifies an update map
+\[
+u_m\colon P_X^{\mathrm{fin}}(1)\to M,
+\]
+whose domain $P_X^{\mathrm{fin}}(1)\cong\sum_{n\in\nn}\{(T_1,\ldots,T_n):T_i\subseteq R\times R\}$ is the set of finite menu contexts.  When an actual context $(T_1,\ldots,T_n)$ is presented the market outputs the tuple $\epsilon_m(T_1,\ldots,T_n)$ and moves to the new market state $u_m(T_1,\ldots,T_n)$.
+\end{definition}
+
+Different market-agent state spaces and update rules model different mechanisms.  For a centralized exchange such as an NYSE-style central limit order book, the market agent may be close to literal: $M$ can include book state and the coalgebra can encode matching behavior.  For a decentralized system such as Bitcoin, there need not be one literal market agent; different choices of $M$ can model miners, mempool state, block selection, or the aggregate mechanism that participants use as a predictive fiction --- i.e.\ the global state of the blockchain, or the global ledger.
+
+\begin{example}\label{ex:market-agent}
+We present three market-agents that, given the same exposed menus from Alice and Bob, produce events with different relationships.  $M_1$ and $M_2$ produce two different events; $M_1$ and $M_1'$ are different market-agents producing the same event, illustrating that a single one-step observation does not determine the market-agent.
+
+Reuse Alice (state \texttt{eager}, portfolio $v_A = (1000, 0)$) and Bob (state \texttt{hold}, portfolio $v_B = (200, 20)$) from Example~\ref{ex:event}.  Take $X = 1$, so there are no local observations and a response rule is a tuple of trades alone.  The exposed menus form the 2-participant context $(T_{\texttt{eager}}, T_{\texttt{hold}})$.  Pairs $((v_A, v_A'), (v_B, v_B'))$ in $T_{\texttt{eager}} \times T_{\texttt{hold}}$ --- the direction set of $P_X^{\otimes 2}$ at the place $(T_{\texttt{eager}}, T_{\texttt{hold}})$ --- that conserve value are parametrized by a quantity $q \in \{1,\ldots,5\}$ and a price $p \in [100, 102]$.
+
+\medskip
+\noindent\textbf{Market-agent $M_1$ (passive matcher).}  Let $M_1 = \{\texttt{ready}\}$ with response rule
+\[
+\epsilon^{(1)}_{\texttt{ready}}(T_{\texttt{eager}}, T_{\texttt{hold}})
+=\big(\,((1000,0),(700,3)),\;((200,20),(500,17))\,\big)
+\]
+(quantity $q=3$ at price $p=100$) and update $u^{(1)}_{\texttt{ready}}(T_{\texttt{eager}}, T_{\texttt{hold}}) = \texttt{ready}$.  This market-agent produces exactly the event $e_1$ of Example~\ref{ex:event}.
+
+\medskip
+\noindent\textbf{Market-agent $M_2$ (aggressive midpoint).}  Let $M_2 = \{\texttt{ready}\}$ with
+\[
+\epsilon^{(2)}_{\texttt{ready}}(T_{\texttt{eager}}, T_{\texttt{hold}})
+=\big(\,((1000,0),(495,5)),\;((200,20),(705,15))\,\big)
+\]
+(quantity $q=5$ at price $p=101$) and $u^{(2)}_{\texttt{ready}}(\cdot) = \texttt{ready}$.  This produces a different event $e_2$:
+
+\begin{center}
+\begin{tikzpicture}[oriented WD, bby=2.5ex, bbx=1.5cm, bb port sep=1, bb min width=1.2cm]
+  \node[bb={2}{2}] (E) {$e_2$};
+  \draw[blue!70!black] (E_in1) to +(-.4cm,0) node[left, font=\scriptsize, text=blue!70!black] {Alice: $(\texttt{eager},\;(1000,0))$};
+  \draw[red!60!black] (E_in2) to +(-.4cm,0) node[left, font=\scriptsize, text=red!60!black] {Bob: $(\texttt{hold},\;(200,20))$};
+  \draw[blue!70!black] (E_out1) to +(.4cm,0) node[right, font=\scriptsize, text=blue!70!black] {$(\texttt{cautious},\;(495,5))$};
+  \draw[red!60!black] (E_out2) to +(.4cm,0) node[right, font=\scriptsize, text=red!60!black] {$(\texttt{hold},\;(705,15))$};
+\end{tikzpicture}
+\end{center}
+
+\medskip
+\noindent\textbf{Market-agent $M_1'$ (richer state, same one-step output).}  Let $M_1' = \{\texttt{ready},\,\texttt{aggressive}\}$ with initial state $\texttt{ready}$ and response rules
+\begin{align*}
+\epsilon^{(1')}_{\texttt{ready}}(T_{\texttt{eager}}, T_{\texttt{hold}})
+&=\big(\,((1000,0),(700,3)),\;((200,20),(500,17))\,\big),\\
+\epsilon^{(1')}_{\texttt{aggressive}}(T_{\texttt{eager}}, T_{\texttt{hold}})
+&=\big(\,((1000,0),(495,5)),\;((200,20),(705,15))\,\big),
+\end{align*}
+and trivial updates $u^{(1')}_{\texttt{ready}}(\cdot) = u^{(1')}_{\texttt{aggressive}}(\cdot) = \texttt{ready}$.  From its initial state, $M_1'$ produces the same event $e_1$ as $M_1$; the second state would have produced $e_2$.  $M_1$ and $M_1'$ are different market-agents with different carriers, yet a single observation of $e_1$ does not distinguish them.
+
+\medskip
+In all three cases value is conserved (total $(1200, 20)$), the selected trades lie inside the exposed menus, and update consistency uses the same transition maps $f_{\texttt{eager}}$ and $f_{\texttt{hold}}$ from Alice's and Bob's agent-without-portfolio coalgebras (Example~\ref{ex:agent-without-portfolio}) --- Alice transitions to \texttt{cautious}, Bob remains in \texttt{hold}.  The market-agents differ only in their carriers and response rules, which is exactly the mechanism-side degree of freedom that distinguishes one market from another.
+\end{example}
+
+A single one-step observation rarely determines the market-agent --- $M_1$ and $M_1'$ above are different market-agents that produce the same event $e_1$.  The questions of \emph{multiplicity} (which market-agents could have produced a given event or history) and \emph{uniqueness} (when a long-enough history determines the market-agent) form an open thread we will not pursue here.  Equilibria are a natural candidate interpretation of fixed points of the joint participant--market dynamics: as the agents update their states under repeated event production, and the market updates its own, an equilibrium is a configuration on which both updates idle.  Portfolios have been carried alongside the market-agent state without entering the polynomial-functor framework; the next subsection treats their reintroduction.
+
+\subsubsection*{Reintroducing portfolios}
+
+The omission of portfolios from the market-agent polynomial was deliberate but temporary.  Up to this point, portfolios have been carried alongside agent state: they constrain which trade directions an agent may expose, but they have not themselves been made part of the polynomial-functor framework.  The reconstruction problem is to isolate the portfolio dynamics that, when recombined with portfolio-free agency, recovers the original agents-with-portfolios picture.
+
+Define a portfolio category whose objects are elements $x\in R$.  A morphism, or direction, $x\to y$ is a triple $(k,t_1,t_2)\in R^3$ such that
+\[
+k+t_1=x,\qquad k+t_2=y.
+\]
+This direction means: leave the common part $k$ unchanged and replace $t_1$ by $t_2$.  The pair $(t_1,t_2)$ is the visible trade, while $k$ records the untouched part of the portfolio.  In polynomial-comonad language, the positions are portfolios and the directions out of a position are exactly these portfolio-changing moves; the category structure supplies identities and composition of such moves.
+
+\begin{example}\label{ex:portfolio-morphisms}
+We illustrate the portfolio category on the event $e_1$ of Example~\ref{ex:market-agent}.  Alice's portfolio transitions from $v_A = (1000, 0)$ to $v_A' = (700, 3)$.  A natural decomposition is
+\[
+k_A = (700, 0),\qquad t_{A,1} = (300, 0),\qquad t_{A,2} = (0, 3),
+\]
+so $k_A + t_{A,1} = v_A$ and $k_A + t_{A,2} = v_A'$: $700$ in cash is untouched, $\$300$ is given up, $3$ shares are received.  Bob's portfolio transitions from $v_B = (200, 20)$ to $v_B' = (500, 17)$, decomposed as
+\[
+k_B = (200, 17),\qquad t_{B,1} = (0, 3),\qquad t_{B,2} = (300, 0):
+\]
+$\$200$ in cash and $17$ shares are untouched, $3$ shares are given up, $\$300$ is received.  The swap structure is visible in the matching $t_{A,1} = t_{B,2}$ and $t_{A,2} = t_{B,1}$: what Alice gives up is what Bob receives, and vice versa.  Aggregating recovers value conservation at the level of these morphisms, $t_{A,1} + t_{B,1} = (300, 3) = t_{A,2} + t_{B,2}$.
+\end{example}
+
+We record the desired recombination as a conjectural target:
+\begin{equation}\label{eq:portfolio-recombination-target}
+\Cat{AgentWithPortfolio}
+\simeq
+\Cat{AgentWithoutPortfolio}\times\Cat{Portfolio}.
+\end{equation}
+The equivalence in \eqref{eq:portfolio-recombination-target} is not a theorem established here.  It states what the later development should prove once the portfolio category and the portfolio-free agents have been specified with enough structure.
+
+\mygreen{Note (planned refactor): The opening Agents section will be reframed so that an agent has type $X$ and is a coalgebra (with portfolio) for $P_X$, rather than for the current abstract update-direction assignment.  Once that refactor lands, events will be re-presented from the market-agent perspective.  An event becomes a pairing of $n$ portfolio-free agents of type $X$, written $A_1, \ldots, A_n$, with a market-agent of type $(X, n)$.  The market-agent definition becomes parametric: a market-agent of type $(X, n)$ is a coalgebra $M\yon^M \to (P_X^{\otimes n})^\vee$ for a fixed participant count, and a market-agent of type $(X, \mathrm{fin})$ is a coalgebra into $(P_X^{\mathrm{fin}})^\vee$ for any finite count (the current definition).  The three event axioms split into three coherence conditions, one per piece.  \emph{Agent coherence}: for each $i$, the new state matches the agent coalgebra's update, $f_i(d_i) = a_i'$.  \emph{Portfolio coherence / conservation}: for each $i$, the direction realizes the claimed portfolio change, $\pi_{T_i}(d_i) = (v_i, v_i')$, and aggregate value is conserved, $\sum v_i = \sum v_i'$; equivalently, the portfolio-category morphisms $v_i \to v_i'$ with decompositions $(k_i, t_{i,1}, t_{i,2})$ satisfy the swap $\sum_i t_{i,1} = \sum_i t_{i,2}$.  \emph{Event coherence}: the chosen directions are produced by a market-agent's response rule --- there exist a market-agent of type $(X, n)$ and a state $m \in M$ such that $\epsilon_m(T_1, \ldots, T_n) = ((d_1, x_1), \ldots, (d_n, x_n))$.  Trade-realization lives at the agent--portfolio interface but the constraint is on the portfolio dynamics, so we group it under portfolio coherence.}
+
+%% ===================================================================
+\section*{Markets via the event prop}
+%% ===================================================================
+
+The previous section modeled the market as a coalgebraic agent: a stateful rule that responds to the menus participants expose.  We now shift from modeling that market-agent object to modeling the compositional structure of trading histories themselves.  The basic units are one-step exchange events, and the event prop records how such events compose in parallel and in time.
+
 Our next goal is to define a colored prop with $\Set{Agent}$ as the set of colors.  Given $x\colon I\to\Set{Agent}$ and $y\colon J\to\Set{Agent}$, we write $(x,y)\colon I+J\to\Set{Agent}$ for their copairing.
 
 \begin{proposition}\label{prop:parallel}
@@ -607,7 +848,7 @@ Given events $e\colon x\to x'$ and $f\colon y\to y'$, where $x,x'\colon I\to\Set
 \end{proposition}
 
 \begin{proof}
-We just need to check the requirements. Value conservation holds $\sum_{i\in I}v_i+\sum_{j\in J}v_j=\sum_{i\in I}v'_i+\sum_{j\in J}v'_j$, since each sum holds separately.  Trade willingness and update consistency hold for each participant, since they hold in $e$ and $f$ respectively.
+We just need to check the requirements. Value conservation holds $\sum_{i\in I}v_i+\sum_{j\in J}v_j=\sum_{i\in I}v'_i+\sum_{j\in J}v'_j$, since each sum holds separately.  Trade realization and update consistency hold for each participant, since they hold in $e$ and $f$ respectively.
 \end{proof}
 
 
@@ -624,11 +865,15 @@ We just need to check the requirements. Value conservation holds $\sum_{i\in I}v
   \draw (E2_out2) to +(.4cm,0) node[right, font=\scriptsize] {$(a_2'', v_2'')$};
 \end{tikzpicture}
 \]
-Each event involves one update step from the coalgebras, whereas the proposed composite requires two steps. Indeed, if we tried to describe the composite as a single exchange event from $(a_i, v_i)$ to $(a_i'', v_i'')$, update consistency would require $a_i'' = f_{a_i}(v_i, v_i'')$ for each agent~$i$.  But the actual value is
+Each event involves one update step from the coalgebras, whereas the proposed composite requires two steps. Indeed, if we tried to describe the composite as a single exchange event from $(a_i, v_i)$ to $(a_i'', v_i'')$, update consistency would require a direction $\bar d_i\in D_{T_{a_i}}^{\trd}$ satisfying
 \[
-a_i'' \;=\; f_{a_i'}(v_i', v_i''),\where a_i'=f_{a_i}(v_i,v_i')
+\pi_{T_{a_i}}(\bar d_i)=(v_i,v_i'')\qand f_{a_i}(\bar d_i)=a_i''.
 \]
-and the required equation $a_i''=^?f_{a_i}(v_i, v_i'')$ may not hold. Similarly, $(v_i, v_i'')$ may not even belong to $T_{a_i}$, so trade willingness can also fail.
+But the actual two-step value is obtained from directions $d_i\in D_{T_{a_i}}^{\trd}$ and $d_i'\in D_{T_{a_i'}}^{\trd}$:
+\[
+a_i'' \;=\; f_{a_i'}(d_i'),\where a_i'=f_{a_i}(d_i).
+\]
+There need not be any one-step direction $\bar d_i$ with the required underlying trade and state update. Similarly, $(v_i, v_i'')$ may not even belong to $T_{a_i}$, so trade realization can also fail.
 
 Concretely: Alice and Bob trade in event $e_1$: Alice buys 3 shares at \$100 in state \texttt{eager} and transitions to \texttt{cautious}.  Then they trade again in event $e_2$, but now Alice's trade menu is different (buy up to 2 at $\leq\$98$ instead of up to 5 at $\leq\$102$).  No single event initiated when Alice's state is \texttt{eager} can capture this two-step history.
 
@@ -708,18 +953,17 @@ Every morphism $e\colon (I,x)\to (J,y)$ in the event prop has the same number of
 
 Moreover, for each $i:I$ with $x_i=(A_i,\tau_i,a_i,v_i)$ and $y_i=(A_i, \tau_i, a_i', v_i')$, there exists a nonempty sequence of states and values $(a^1,v^1),\ldots,(a^{N+1},v^{N+1})$ such that $(a_i,v_i)=(a^1,v^1)$, $(a_i', v_i')=(a^{N+1},v^{N+1})$, and for each $1\leq n\leq N$:
 \[
-	\tau_i(a^n)=(T^n,f^n)\where (v^n,v^{n+1})\in T^n\qand f^n_{a^n}(v^n,v^{n+1})=a^{n+1}.
+	\tau_i(a^n)=(T^n,f^n)
+	\where d^n\in D_{T^n}^{\trd},\quad
+	\pi_{T^n}(d^n)=(v^n,v^{n+1}),\qand
+	f^n(d^n)=a^{n+1}.
 \]
 \end{proposition}
 \begin{proof}
 **
 \end{proof}
 
-%% ===================================================================
-\section*{Markets via the event prop}
-%% ===================================================================
-
-The event prop $\Event$ contains all possible trading histories consistent with value conservation, trade willingness, and update consistency: every way that agents could exchange resources, in any order, with any wiring.  Most of this is far too general to describe any particular economic setting.
+The event prop $\Event$ contains all possible trading histories consistent with value conservation, trade realization, and update consistency: every way that agents could exchange resources, in any order, with any wiring.  Most of this is far too general to describe any particular economic setting.
 
 A \emph{market} should be some structured collection of events in $\Event$---the events that a particular mechanism permits.  The eventual goal of this work is to pick out collections corresponding to specific real-world markets, and to ask whether this framework can recover existing financial mathematics or reveal structure that was not visible before.
 
@@ -887,7 +1131,7 @@ Without state, limit order events compose trivially---everything collapses to a 
 %% ===================================================================
 
 \begin{question}
-The functor $F(A) = \sum_{T \subseteq V \times V} A^T$ does not appear to carry comonad structure: a counit $\varepsilon\colon F \to \mathrm{Id}$ would require extracting an element of $A$ from a pair $(T, f\colon T \to A)$, but $T$ may be empty.  What changes if we require every trade menu to be nonempty (the null trade is always available)?  Would $F$ then be a comonad, and would the coalgebra condition be meaningful?
+The functor $F(A) = \sum_{T \subseteq V \times V} A^{D_T}$ does not appear to carry comonad structure: a counit $\varepsilon\colon F \to \mathrm{Id}$ would require extracting an element of $A$ from a pair $(T, f\colon D_T \to A)$, but $D_T$ may be empty.  What changes if we require every direction set $D_T$ to be nonempty?  In the original special case $D_T=T$, this amounts to requiring every trade menu to be nonempty, for instance by making the null trade always available.  Would $F$ then be a comonad, and would the coalgebra condition be meaningful?
 \end{question}
 
 \begin{question}
@@ -895,7 +1139,7 @@ Value conservation is a local, instantaneous conservation law.  It would only am
 \end{question}
 
 \begin{question}
-One-step events in $\Event$ are closed under sequential composition if and only if the coalgebra satisfies
+In the original special case $D_T=T$, one-step events in $\Event$ are closed under sequential composition if and only if the coalgebra satisfies
 \[
 f_{f_a(v_1,v_2)}(v_2,v_3) \;=\; f_a(v_1,v_3)
 \]
