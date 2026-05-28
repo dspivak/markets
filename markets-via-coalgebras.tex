@@ -470,7 +470,7 @@ citecolor=orange!50!black, urlcolor=orange!50!black, pdfencoding=unicode]{hyperr
 
 \end{abstract}
 
-Fix a finite-dimensional real vector space $V$ (the \emph{portfolio space}).  We model economic agents as coalgebras for a polynomial endofunctor on $\smset$, and trading events as generators of a free colored prop.  We will define a market as a sub-prop of events, for example as selected by some mechanism such as a central limit order book.
+Fix a resource set $R$ carrying the structure of a commutative monoid $(R,+,0)$, so that holdings combine additively.  The default mental picture is the free commutative monoid on a set of named resources: each holding is a finite formal sum $\sum_i n_i r_i$ with non-negative integer multiplicities $n_i$.  Taking $R$ to be a group instead introduces negative elements, which model idealized debt.  Taking rational coefficients allows fractional holdings for all assets in every trade scenario.  We model economic agents as coalgebras for a polynomial endofunctor on $\smset$, and trading events as generators of a free colored prop.  We will define a market as a sub-prop of events, for example as selected by some mechanism such as a central limit order book.
 
 %% ===================================================================
 \section*{Agents}
@@ -480,40 +480,18 @@ Fix a finite-dimensional real vector space $V$ (the \emph{portfolio space}).  We
 An agent has an internal state---encoding its beliefs, risk limits, and inventory constraints---and a trading policy that depends on that state.  In each state, rather than assuming it has a partial order on all possible resources defined by a utility function, we assume less: the agent knows which trades it is willing to accept; whenever an acceptable trade is executed, the agent's state updates deterministically according to the information made available by the event.
 
 \begin{definition}
-Fix an \emph{update-direction assignment}: for every trade menu $T\subseteq V\times V$, a set $D_T$ of update directions, a subset $D_T^{\trd}\subseteq D_T$ of trade directions, and a function
-\[
-\pi_T\colon D_T^{\trd}\to T
-\]
-which sends a trade direction to the underlying portfolio replacement that it realizes.
-
-Define a functor $F\colon \smset \to \smset$ by
-\[
-F(A)\coloneqq \coprod_{T \subseteq V \times V} A^{D_T}.
-\]
-
-% NOTE FOR FUTURE REVISION: The coproduct ranges over ALL subsets T ⊆ V×V,
-% which is a large index set. This is intentional: we are not restricting to
-% finite menus. The key point is that for any coalgebra α: A → F(A), the
-% image of α only involves |A|-many summands, so in practice the coproduct
-% is no more unwieldy than A itself. This is a set-theoretic nuance, not a
-% mathematical error — do not flag it as a gap in future passes.
-An element of $F(A)$ consists of a set $T$, called the \emph{trade menu}, together with a function $f\colon D_T \to A$, called the \emph{transition map}.
-
-An \emph{agent type} is an $F$-coalgebra $\tau\colon A \to F(A)$; elements of the carrier $A$ are called \emph{agent states}.  For each state $a \in A$, write $\tau(a) = (T_a, f_a)$, where the trade menu $T_a \subseteq V \times V$ is a relation on portfolios: $(v,v') \in T_a$ means that an agent in state~$a$ whose current portfolio is~$v$ is willing to have it replaced by~$v'$.  This allows trade willingness to depend on the agent's current holdings---for example, an agent may refuse to sell shares it does not own.  The transition map $f_a\colon D_{T_a}\to A$ sends each update direction to the agent's updated state.  If $d\in D_{T_a}^{\trd}$ and $\pi_{T_a}(d)=(v,v')$, then $f_a(d)$ is the new state after the portfolio changes from $v$ to $v'$ with update information $d$.
+Fix a set $X$ of local observations.  An \emph{agent} consists of:
+\begin{itemize}[nosep]
+\item a set $A$ of \emph{states};
+\item for each state $a \in A$, a \emph{trade menu} $T_a \subseteq R \times R$;
+\item for each state $a \in A$, an \emph{update map} $f_a \colon T_a \times X \to A$.
+\end{itemize}
 \end{definition}
-
-\begin{remark}\label{rem:observable}
-The original model is recovered by taking $D_T^{\trd}=D_T=T$ and $\pi_T=\id_T$ for every trade menu $T$.  A useful generalization is
-\[
-D_T=T\times X+W,\qquad D_T^{\trd}=T\times X,\qquad \pi_T(t,x)=t.
-\]
-Here $x\in X$ is local information attached to an executed trade---for example, execution details, counterparty information, or an order-book observation---while $w\in W$ is a global update direction not tied to a particular trade, such as news, a clock tick, or an external price signal.
-\end{remark}
 
 \medskip
 \textbf{Running example.}
-For the running example, take the original choice $D_T=T$, so the transition map may be written as $f_a(v,v')$.
-Let $V = \mathbb{R}^2$ with coordinates $(c, q)$, where $c$ is cash and $q$ is the quantity of one asset.  Consider two agents, Alice and Bob, with initial portfolios $v_A = (1000, 0)$ and $v_B = (200, 20)$.
+In this example, $X = 1$, so the update map collapses to $f_a \colon T_a \to A$; for a trade $t=(r,r')$, we write the update as $f_a(t)$.
+Let $R = \mathbb{R}^2$ with coordinates $(c, q)$, where $c$ is cash and $q$ is the quantity of one asset.  Consider two agents, Alice and Bob, with initial portfolios $v_A = (1000, 0)$ and $v_B = (200, 20)$.
 
 \medskip
 \noindent\textbf{Alice} has state space $A = \{\texttt{eager},\,\texttt{cautious}\}$:
@@ -521,7 +499,7 @@ Let $V = \mathbb{R}^2$ with coordinates $(c, q)$, where $c$ is cash and $q$ is t
 \renewcommand{\arraystretch}{1.3}
 \begin{tabular}{p{2.2cm}p{5.8cm}p{5cm}}
 \hline
-State $a$ & Trade menu $T_a$ & Transition $f_a(v,v')$ \\
+State $a$ & Trade menu $T_a$ & Transition $f_a(t)$ \\
 \hline
 $\texttt{eager}$ & buy up to 5 shares at $\leq\$102$ each & $\texttt{cautious}$ for all $(v,v') \in T_a$ \\
 $\texttt{cautious}$ & buy up to 2 shares at $\leq\$98$ each & $\texttt{cautious}$ for all $(v,v') \in T_a$ \\
@@ -535,7 +513,7 @@ $\texttt{cautious}$ & buy up to 2 shares at $\leq\$98$ each & $\texttt{cautious}
 \renewcommand{\arraystretch}{1.3}
 \begin{tabular}{p{2.2cm}p{5.8cm}p{5cm}}
 \hline
-State $a$ & Trade menu $T_a$ & Transition $f_a(v,v')$ \\
+State $a$ & Trade menu $T_a$ & Transition $f_a(t)$ \\
 \hline
 $\texttt{hold}$ & sell up to 10 shares at $\geq\$100$ each & $\texttt{hold}$ for all $(v,v') \in T_a$ \\
 \hline
@@ -679,7 +657,7 @@ Read in parallel with the internal-hom gloss above: \emph{a position of $p^\vee$
 
 This subsection develops the single-agent base case; in \emph{The market-agent polynomial} below, tensoring this object with itself and dualizing produces the market-agent.  Of the four constructions from \emph{Polynomial preliminaries}, only the internal hom enters here; the tensor and dual appear in the next subsection.
 
-Throughout this section, assume the resource set carries the structure of a commutative monoid $(R,+,0)$, so that holdings combine additively.  The default mental picture is the free commutative monoid on a set of named resources: each holding is a finite formal sum $\sum_i n_i r_i$ with non-negative integer multiplicities $n_i$.  Taking $R$ to be a group instead introduces negative elements, which model idealized debt.  Taking rational coefficients allows fractional holdings for all assets in every trade scenario.  For a set $X$ of local event observations, define
+For a set $X$ of local event observations, define
 \[
 P_X \coloneqq \sum_{T\subseteq R\times R} \yon^{T X}.
 \]
