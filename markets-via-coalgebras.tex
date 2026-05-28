@@ -317,7 +317,6 @@ citecolor=orange!50!black, urlcolor=orange!50!black, pdfencoding=unicode]{hyperr
 
 \newcommand{\id}{\mathrm{id}}
 \newcommand{\then}{\mathbin{\fatsemi}}
-\newcommand{\trd}{\mathrm{tr}}
 
 \newcommand{\cocolon}{:\!}
 
@@ -525,9 +524,9 @@ $\texttt{hold}$ & sell up to 10 shares at $\geq\$100$ each & $\texttt{hold}$ for
 %% ===================================================================
 
 \textbf{Informal picture.}
-An event involves some number of agents simultaneously.  Each agent enters with a current state and a current portfolio and exits with a (possibly different) state and portfolio.  The agent types---meaning the coalgebra structures governing what each agent will accept---do not change during an event.  What can change is the distribution of resources and the state of each agent.
+An event involves some number of agents simultaneously.  Each agent enters with a current state and a current portfolio and exits with a (possibly different) state and portfolio.  The underlying agent data from \S1---state set, trade menus, and update maps---does not change during an event.  What can change is the distribution of resources and the state of each agent.
 
-Let $\Set{Agent}$ denote the class of all tuples $(A, \tau, a, v)$ consisting of an agent type $(A,\tau)$, a state $a\in A$, and a portfolio $v\in V$; we call these \emph{agents}.  We draw an event as a box, as will later be used in string diagrams.  Each wire carries an agent.  Wires entering from the left are the agents before the event; wires exiting to the right are the agents after.
+Let $\Set{Agent}$ denote the class of all tuples $(A, \tau, a, v)$ where $\tau$ packages the \S1 agent data on $A$, $a\in A$ is a state, and $v\in R$ is a portfolio; we call these \emph{agents}.  We draw an event as a box, as will later be used in string diagrams.  Each wire carries an agent.  Wires entering from the left are the agents before the event; wires exiting to the right are the agents after.
 
 \[
 \begin{tikzpicture}[oriented WD, bby=2.5ex, bbx=1.5cm, bb port sep=1.5, bb min width=1.2cm]
@@ -540,15 +539,15 @@ Let $\Set{Agent}$ denote the class of all tuples $(A, \tau, a, v)$ consisting of
   \node[above right=-9pt and 0] at ($(E_out1)!.5!(E_out2)$) {$\vdots$};
 \end{tikzpicture}
 \]
-There will be three conditions for this to be a valid event, namely that there is no overall change in the amount of assets, that each agent was willing to make the trade that occurred, and that each agent updated to a new state consistent with its coalgebra structure and the update direction supplied by the event.
+There will be three conditions for this to be a valid event, namely that there is no overall change in the amount of assets, that each selected trade lies in the agent's current menu, and that each agent updated to a new state according to its current update map and local observation.
 \begin{definition}
 Let $x,x'\colon I\to\Set{Agent}$ with $x(i)=(A_i,\tau_i,a_i,v_i)$ and $x'(i)=(A_i,\tau_i,a_i',v_i')$ for each $i\in I$, and write $(T_i,f_i)\coloneqq\tau_i(a_i)$.  An \emph{exchange event}
 \[e\colon x\to x'\]
-consists of directions $d_i\in D_{T_i}^{\trd}$ for each $i\in I$ such that three conditions hold:
+consists of trade-observation pairs $(t_i,x_i)\in T_i\times X$ for each $i\in I$ such that three conditions hold:
 \begin{description}
 	\item[\quad Value conservation:] $\sum_{i\in I} v_i=\sum_{i\in I}v_i'$
-	\item[\quad Trade realization:] $\pi_{T_i}(d_i)=(v_i,v_i')$, for each $i$, and
-	\item[\quad Update consistency:] $f_i(d_i)=a_i'$, for each $i$.
+	\item[\quad Selected trade:] $t_i=(v_i,v_i')$, for each $i$, and
+	\item[\quad Update consistency:] $f_i(t_i,x_i)=a_i'$, for each $i$.
 \end{description}
 \end{definition}
 
@@ -558,7 +557,7 @@ consists of directions $d_i\in D_{T_i}^{\trd}$ for each $i\in I$ such that three
 
 
 \begin{example}\label{ex:event}
-Alice is in state \texttt{eager} with portfolio $v_A = (1000, 0)$; Bob is in state \texttt{hold} with $v_B = (200, 20)$.  An event in which Alice buys 3 shares from Bob at \$100 each:
+Alice is in state \texttt{eager} with portfolio $v_A = (1000, 0)$; Bob is in state \texttt{hold} with $v_B = (200, 20)$.  As in the running example, $X=1$, so the observation components are omitted.  An event in which Alice buys 3 shares from Bob at \$100 each:
 
 \begin{center}
 \begin{tikzpicture}[oriented WD, bby=2.5ex, bbx=1.5cm, bb port sep=1, bb min width=1.2cm]
@@ -574,14 +573,14 @@ Alice is in state \texttt{eager} with portfolio $v_A = (1000, 0)$; Bob is in sta
 
 \noindent\emph{Trade willingness:}
 \begin{itemize}[nosep]
-\item Alice in state \texttt{eager} accepts buying up to 5 shares at $\leq\$102$.  The trade is 3 shares at \$100, so $(v_A, v'_A) \in T_{\texttt{eager}}$.
-\item Bob in \texttt{hold} accepts selling up to 10 at $\geq\$100$.  The trade qualifies, so $(v_B, v'_B) \in T_{\texttt{hold}}$.
+\item Alice in state \texttt{eager} accepts buying up to 5 shares at $\leq\$102$.  The trade is 3 shares at \$100, so $t_A\coloneqq(v_A, v'_A) \in T_{\texttt{eager}}$.
+\item Bob in \texttt{hold} accepts selling up to 10 at $\geq\$100$.  The trade qualifies, so $t_B\coloneqq(v_B, v'_B) \in T_{\texttt{hold}}$.
 \end{itemize}
 
 \noindent\emph{Update consistency:}
 \begin{itemize}[nosep]
-\item $f_{\texttt{eager}}(v_A, v'_A) = \texttt{cautious} = a'_A$.
-\item $f_{\texttt{hold}}(v_B, v'_B) = \texttt{hold} = a'_B$.
+\item $f_{\texttt{eager}}(t_A) = \texttt{cautious} = a'_A$.
+\item $f_{\texttt{hold}}(t_B) = \texttt{hold} = a'_B$.
 \qedhere
 \end{itemize}
 \end{example}
@@ -657,11 +656,11 @@ Read in parallel with the internal-hom gloss above: \emph{a position of $p^\vee$
 
 This subsection develops the single-agent base case; in \emph{The market-agent polynomial} below, tensoring this object with itself and dualizing produces the market-agent.  Of the four constructions from \emph{Polynomial preliminaries}, only the internal hom enters here; the tensor and dual appear in the next subsection.
 
-For a set $X$ of local event observations, define
+Define
 \[
 P_X \coloneqq \sum_{T\subseteq R\times R} \yon^{T X}.
 \]
-Here juxtaposition $TX$ in the exponent denotes the cartesian product $T\times X$; we use this convention for products of direction sets throughout.  A place of $P_X$ is a trade menu $T\subseteq R\times R$.  The directions at that menu are $T X$: an acceptable trade together with a local observation.  This is the concrete trade-local case of the update-direction assignment above, with the global $W$-directions suppressed.
+Here juxtaposition $TX$ in the exponent denotes the cartesian product $T\times X$; we use this convention for products of direction sets throughout.  A place of $P_X$ is a trade menu $T\subseteq R\times R$.  The directions at that menu are $T X$: an acceptable trade together with a local observation.  This matches the agent data of \S1, with the local observation set $X$ playing its assigned role.
 
 For any set $A$, the polynomial $A\yon^A$ has position set $A$ and constant direction set $A$ at every position.  A coalgebra $A\yon^A \to p$ is, by direct evaluation at $A$, a function $A \to p(A)$.  The Definition below records the unpacking for $p = P_X$: each state $a\in A$ becomes a choice of trade menu and an update map into $A$.
 
@@ -810,8 +809,6 @@ We record the desired recombination as a conjectural target:
 \end{equation}
 The equivalence in \eqref{eq:portfolio-recombination-target} is not a theorem established here.  It states what the later development should prove once the portfolio category and the portfolio-free agents have been specified with enough structure.
 
-\mygreen{Note (planned refactor): The opening Agents section will be reframed so that an agent has type $X$ and is a coalgebra (with portfolio) for $P_X$, rather than for the current abstract update-direction assignment.  Once that refactor lands, events will be re-presented from the market-agent perspective.  An event becomes a pairing of $n$ portfolio-free agents of type $X$, written $A_1, \ldots, A_n$, with a market-agent of type $(X, n)$.  The market-agent definition becomes parametric: a market-agent of type $(X, n)$ is a coalgebra $M\yon^M \to (P_X^{\otimes n})^\vee$ for a fixed participant count, and a market-agent of type $(X, \mathrm{fin})$ is a coalgebra into $(P_X^{\mathrm{fin}})^\vee$ for any finite count (the current definition).  The three event axioms split into three coherence conditions, one per piece.  \emph{Agent coherence}: for each $i$, the new state matches the agent coalgebra's update, $f_i(d_i) = a_i'$.  \emph{Portfolio coherence / conservation}: for each $i$, the direction realizes the claimed portfolio change, $\pi_{T_i}(d_i) = (v_i, v_i')$, and aggregate value is conserved, $\sum v_i = \sum v_i'$; equivalently, the portfolio-category morphisms $v_i \to v_i'$ with decompositions $(k_i, t_{i,1}, t_{i,2})$ satisfy the swap $\sum_i t_{i,1} = \sum_i t_{i,2}$.  \emph{Event coherence}: the chosen directions are produced by a market-agent's response rule --- there exist a market-agent of type $(X, n)$ and a state $m \in M$ such that $\epsilon_m(T_1, \ldots, T_n) = ((d_1, x_1), \ldots, (d_n, x_n))$.  Trade-realization lives at the agent--portfolio interface but the constraint is on the portfolio dynamics, so we group it under portfolio coherence.}
-
 %% ===================================================================
 \section*{Markets via the event prop}
 %% ===================================================================
@@ -843,15 +840,15 @@ We just need to check the requirements. Value conservation holds $\sum_{i\in I}v
   \draw (E2_out2) to +(.4cm,0) node[right, font=\scriptsize] {$(a_2'', v_2'')$};
 \end{tikzpicture}
 \]
-Each event involves one update step from the coalgebras, whereas the proposed composite requires two steps. Indeed, if we tried to describe the composite as a single exchange event from $(a_i, v_i)$ to $(a_i'', v_i'')$, update consistency would require a direction $\bar d_i\in D_{T_{a_i}}^{\trd}$ satisfying
+Each event involves one update step from the coalgebras, whereas the proposed composite requires two steps. Indeed, if we tried to describe the composite as a single exchange event from $(a_i, v_i)$ to $(a_i'', v_i'')$, update consistency would require a trade-observation pair $(\bar t_i,\bar x_i)\in T_{a_i}X$ satisfying
 \[
-\pi_{T_{a_i}}(\bar d_i)=(v_i,v_i'')\qand f_{a_i}(\bar d_i)=a_i''.
+\bar t_i=(v_i,v_i'')\qand f_{a_i}(\bar t_i,\bar x_i)=a_i''.
 \]
-But the actual two-step value is obtained from directions $d_i\in D_{T_{a_i}}^{\trd}$ and $d_i'\in D_{T_{a_i'}}^{\trd}$:
+But the actual two-step path is obtained from trade-observation pairs $(t_i,x_i)\in T_{a_i}X$ and $(t_i',x_i')\in T_{a_i'}X$, with $t_i=(v_i,v_i')$ and $t_i'=(v_i',v_i'')$:
 \[
-a_i'' \;=\; f_{a_i'}(d_i'),\where a_i'=f_{a_i}(d_i).
+a_i'' \;=\; f_{a_i'}(t_i',x_i'),\where a_i'=f_{a_i}(t_i,x_i).
 \]
-There need not be any one-step direction $\bar d_i$ with the required underlying trade and state update. Similarly, $(v_i, v_i'')$ may not even belong to $T_{a_i}$, so trade realization can also fail.
+There need not be any one-step trade-observation pair $(\bar t_i,\bar x_i)$ with the required underlying trade and state update. Similarly, $(v_i, v_i'')$ may not even belong to $T_{a_i}$, so trade realization can also fail.
 
 Concretely: Alice and Bob trade in event $e_1$: Alice buys 3 shares at \$100 in state \texttt{eager} and transitions to \texttt{cautious}.  Then they trade again in event $e_2$, but now Alice's trade menu is different (buy up to 2 at $\leq\$98$ instead of up to 5 at $\leq\$102$).  No single event initiated when Alice's state is \texttt{eager} can capture this two-step history.
 
@@ -931,10 +928,10 @@ Every morphism $e\colon (I,x)\to (J,y)$ in the event prop has the same number of
 
 Moreover, for each $i:I$ with $x_i=(A_i,\tau_i,a_i,v_i)$ and $y_i=(A_i, \tau_i, a_i', v_i')$, there exists a nonempty sequence of states and values $(a^1,v^1),\ldots,(a^{N+1},v^{N+1})$ such that $(a_i,v_i)=(a^1,v^1)$, $(a_i', v_i')=(a^{N+1},v^{N+1})$, and for each $1\leq n\leq N$:
 \[
-	\tau_i(a^n)=(T^n,f^n)
-	\where d^n\in D_{T^n}^{\trd},\quad
-	\pi_{T^n}(d^n)=(v^n,v^{n+1}),\qand
-	f^n(d^n)=a^{n+1}.
+\begin{aligned}
+	\tau_i(a^n)&=(T^n,f^n),\where (t^n,x^n)\in T^nX,\\
+	t^n&=(v^n,v^{n+1}),\qand f^n(t^n,x^n)=a^{n+1}.
+\end{aligned}
 \]
 \end{proposition}
 \begin{proof}
@@ -955,7 +952,7 @@ We begin with a common mechanism: the central limit order book.
 
 A central limit order book (CLOB) is a mechanism for trading financial assets---used, for example, by the New York Stock Exchange, NASDAQ, and the Chicago Mercantile Exchange.  To participate, an agent submits a \emph{limit order}: a declaration of which asset they want to buy or sell, how many units, and the most (or least) they are willing to pay per unit.  The exchange maintains a book of all standing orders.  Whenever a buy order's price meets or exceeds a sell order's price on the same asset, the two orders are matched: the trade executes at some price between the two limits, and the agents' portfolios update accordingly.
 
-Suppose we have $n$ assets and one cash asset, so $V = \mathbb{R}^{n+1}$ with coordinates $(c, q_1, \ldots, q_n)$, where $c$ is cash and $q_k$ is the quantity of asset $k$.
+Suppose we have $n$ assets and one cash asset, so $R = \mathbb{R}^{n+1}$ with coordinates $(c, q_1, \ldots, q_n)$, where $c$ is cash and $q_k$ is the quantity of asset $k$.
 
 \subsubsection*{Limit orders and fills}
 
@@ -987,7 +984,7 @@ A \emph{portfolio limit order} is a tuple $L = (\ell_1, \ldots, \ell_n)$, one li
 \end{definition}
 
 \begin{definition}[Limit order agent]
-A \emph{limit order agent} is a pair $w = (v, L)$: a portfolio $v \in V$ and a portfolio limit order $L$.
+A \emph{limit order agent} is a pair $w = (v, L)$: a portfolio $v \in R$ and a portfolio limit order $L$.
 \end{definition}
 
 This is the simplest model of a CLOB participant: a portfolio and a standing set of orders.  Note that this is \emph{not} rich enough to model Alice---her limit order depends on her internal state, and this definition has no state.  We will return to this point.
@@ -1084,7 +1081,7 @@ A \emph{stateful limit order agent} is a tuple $(S, s_0, \lambda, f, v)$ where:
 \item $S$ is a finite set of states, with initial state $s_0 \in S$,
 \item $\lambda\colon S \to \{\text{portfolio limit orders}\}$ assigns a portfolio limit order to each state,
 \item $f\colon S \times \{\text{valid fills of } \lambda(s)\} \to S$ is a transition map: after a fill in state $s$, the agent moves to state $f(s, \text{fill})$,
-\item $v \in V$ is the current portfolio.
+\item $v \in R$ is the current portfolio.
 \end{itemize}
 \end{definition}
 
@@ -1109,19 +1106,23 @@ Without state, limit order events compose trivially---everything collapses to a 
 %% ===================================================================
 
 \begin{question}
-The functor $F(A) = \sum_{T \subseteq V \times V} A^{D_T}$ does not appear to carry comonad structure: a counit $\varepsilon\colon F \to \mathrm{Id}$ would require extracting an element of $A$ from a pair $(T, f\colon D_T \to A)$, but $D_T$ may be empty.  What changes if we require every direction set $D_T$ to be nonempty?  In the original special case $D_T=T$, this amounts to requiring every trade menu to be nonempty, for instance by making the null trade always available.  Would $F$ then be a comonad, and would the coalgebra condition be meaningful?
+The polynomial functor $P_X(A) = \sum_{T \subseteq R \times R} A^{T X}$ does not appear to carry comonad structure: a counit $\varepsilon\colon P_X \to \mathrm{Id}$ would require extracting an element of $A$ from a pair $(T, f\colon T X \to A)$, but $T X$ may be empty.  What changes if we require every direction set $T X$ to be nonempty?  In the special case $X=1$, this amounts to requiring every trade menu to be nonempty, for instance by making the null trade always available.  Would $P_X$ then be a comonad, and would the coalgebra condition be meaningful?
 \end{question}
 
 \begin{question}
-Value conservation is a local, instantaneous conservation law.  It would only amount to a global conservation law if $V$ captured all resources in the economy.  What happens when multiple event props, over different portfolio spaces, interact?  Is there a meaningful notion of ``open system'' in which local conservation holds but global conservation can fail?
+Value conservation is a local, instantaneous conservation law.  It would only amount to a global conservation law if $R$ captured all resources in the economy.  What happens when multiple event props, over different resource sets, interact?  Is there a meaningful notion of ``open system'' in which local conservation holds but global conservation can fail?
 \end{question}
 
 \begin{question}
-In the original special case $D_T=T$, one-step events in $\Event$ are closed under sequential composition if and only if the coalgebra satisfies
+In the special case $X=1$, one-step events in $\Event$ are closed under sequential composition if and only if the coalgebra satisfies
 \[
-f_{f_a(v_1,v_2)}(v_2,v_3) \;=\; f_a(v_1,v_3)
+f_{f_a(t_{12})}(t_{23}) \;=\; f_a(t_{13})
 \]
-for all composable pairs $(v_1,v_2) \in T_a$ and $(v_2,v_3) \in T_{f_a(v_1,v_2)}$.  Characterize the $F$-coalgebras satisfying this condition.  Does it coincide with a known categorical notion?
+for all composable pairs $t_{12}=(v_1,v_2) \in T_a$ and $t_{23}=(v_2,v_3) \in T_{f_a(t_{12})}$, where $t_{13}=(v_1,v_3)\in T_a$.  For general $X$, the analogous condition would have to account for local observations, with terms such as
+\[
+f_{f_a(t_{12},x_{12})}(t_{23},x_{23}) \;=\; f_a(t_{13},x_{13}).
+\]
+Characterize the $P_X$-coalgebras satisfying the appropriate condition.  Does it coincide with a known categorical notion?
 \end{question}
 
 \begin{question}
@@ -1129,7 +1130,7 @@ What natural quotients of $\Event$ are economically meaningful?  Identifying mor
 \end{question}
 
 \begin{question}
-A stateful limit order agent determines an $F$-coalgebra with limit-order-shaped trade menus.  Is there a useful functor in the reverse direction---from general $F$-coalgebras to stateful limit order agents?  A coalgebraic agent may exhibit cyclic trade preferences (willing to trade $A \to B$, $B \to C$, $C \to A$) that no limit order can represent, suggesting no such functor exists in general.
+A stateful limit order agent determines a $P_X$-coalgebra with limit-order-shaped trade menus.  Is there a useful functor in the reverse direction---from general $P_X$-coalgebras to stateful limit order agents?  A coalgebraic agent may exhibit cyclic trade preferences (willing to trade $A \to B$, $B \to C$, $C \to A$) that no limit order can represent, suggesting no such functor exists in general.
 \end{question}
 
 \section*{Acknowledgments}
