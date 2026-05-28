@@ -586,10 +586,147 @@ Alice is in state \texttt{eager} with portfolio $v_A = (1000, 0)$; Bob is in sta
 \end{example}
 
 %% ===================================================================
+\section*{Markets via the event prop}
+%% ===================================================================
+
+Exchange events capture one-step resource transfers between current agents.  We now pass from individual events to the compositional structure of trading histories themselves.  The basic units are one-step exchange events, and the event prop records how such events compose in parallel and in time.
+
+Our next goal is to define a colored prop with $\Set{Agent}$ as the set of colors.  Given $x\colon I\to\Set{Agent}$ and $y\colon J\to\Set{Agent}$, we write $(x,y)\colon I+J\to\Set{Agent}$ for their copairing.
+
+\begin{proposition}\label{prop:parallel}
+Given events $e\colon x\to x'$ and $f\colon y\to y'$, where $x,x'\colon I\to\Set{Agent}$ and $y,y'\colon J\to\Set{Agent}$, there exists an event
+\[(e,f)\colon (x,y)\to (x',y').\]
+\end{proposition}
+
+\begin{proof}
+We just need to check the requirements. Value conservation holds $\sum_{i\in I}v_i+\sum_{j\in J}v_j=\sum_{i\in I}v'_i+\sum_{j\in J}v'_j$, since each sum holds separately.  Trade realization and update consistency hold for each participant, since they hold in $e$ and $f$ respectively.
+\end{proof}
+
+
+\Cref{prop:parallel} shows that exchange events are closed under parallel composition.  They are \emph{not} closed under sequential composition in general. Suppose we have two events on the same agents and we attempt to compose them sequentially:
+\[
+\begin{tikzpicture}[oriented WD, bby=2.5ex, bbx=1.5cm, bb port sep=1, bb min width=1cm]
+  \node[bb={2}{2}] (E1) {$e_1$};
+  \node[bb={2}{2}, right=2 of E1] (E2) {$e_2$};
+  \draw (E1_in1) to +(-.4cm,0) node[left, font=\scriptsize] {$(a_1, v_1)$};
+  \draw (E1_in2) to +(-.4cm,0) node[left, font=\scriptsize] {$(a_2, v_2)$};
+  \draw (E1_out1) to node[above, font=\scriptsize] {$(a_1', v_1')$} (E2_in1);
+  \draw (E1_out2) to node[below, font=\scriptsize] {$(a_2', v_2')$} (E2_in2);
+  \draw (E2_out1) to +(.4cm,0) node[right, font=\scriptsize] {$(a_1'', v_1'')$};
+  \draw (E2_out2) to +(.4cm,0) node[right, font=\scriptsize] {$(a_2'', v_2'')$};
+\end{tikzpicture}
+\]
+Each event involves one update step from the coalgebras, whereas the proposed composite requires two steps. Indeed, if we tried to describe the composite as a single exchange event from $(a_i, v_i)$ to $(a_i'', v_i'')$, update consistency would require a trade-observation pair $(\bar t_i,\bar x_i)\in T_{a_i}X$ satisfying
+\[
+\bar t_i=(v_i,v_i'')\qand f_{a_i}(\bar t_i,\bar x_i)=a_i''.
+\]
+But the actual two-step path is obtained from trade-observation pairs $(t_i,x_i)\in T_{a_i}X$ and $(t_i',x_i')\in T_{a_i'}X$, with $t_i=(v_i,v_i')$ and $t_i'=(v_i',v_i'')$:
+\[
+a_i'' \;=\; f_{a_i'}(t_i',x_i'),\where a_i'=f_{a_i}(t_i,x_i).
+\]
+There need not be any one-step trade-observation pair $(\bar t_i,\bar x_i)$ with the required underlying trade and state update. Similarly, $(v_i, v_i'')$ may not even belong to $T_{a_i}$, so trade realization can also fail.
+
+Concretely: Alice and Bob trade in event $e_1$: Alice buys 3 shares at \$100 in state \texttt{eager} and transitions to \texttt{cautious}.  Then they trade again in event $e_2$, but now Alice's trade menu is different (buy up to 2 at $\leq\$98$ instead of up to 5 at $\leq\$102$).  No single event initiated when Alice's state is \texttt{eager} can capture this two-step history.
+
+We therefore seek a categorical structure that accommodates both parallel and sequential composition of events, without requiring sequential composites to be one-step events.
+
+\begin{definition}[Prop graph]\label{def:prop-graph}
+A \emph{prop graph} consists of a set $C$ of \emph{colors}, a set $E$ of \emph{edges} equipped with a monoid structure $(E,e_0,*)$, and monoid homomorphisms $\src,\tgt\colon E\to C^*$, where $C^*$ denotes the free monoid on~$C$.
+\end{definition}
+In other words, the source of each edge is a list of colors, and the source of the product of two edges is the list concatenation of the two source lists (and respectively for targets).
+
+\begin{example}\label{ex:prop-graph}
+Exchange events form a prop graph $G$ with color set $\Set{Agent}$, edge set the class of exchange events, source and target maps reading off the input and output agent families, and edge monoid given by \cref{prop:parallel}.
+\end{example}
+
+\begin{definition}[Prop]\label{def:prop}
+Let $C$ be a set.  A \emph{$C$-colored prop} is a strict monoidal category whose monoid of objects is the free monoid~$C^*$.
+\end{definition}
+
+As one might expect, there is an adjunction between prop graphs and props.
+
+\begin{theorem}[Free prop on a prop graph]\label{thm:free-prop}
+For any set $C$ the functor $U\colon\prop_C\to\propgr_C$ has a left adjoint
+\[
+\adj{\propgr_C}{\Free}{U}{\prop_C}
+\]
+and we call $\Free(G)\in\prop$ the \emph{free prop} on a prop graph $G$.
+\end{theorem}
+\begin{proof}
+The operad whose algebras are $C$-colored prop graphs embeds into the operad whose algebras are $C$-colored props \cite{PattersonSpivakVagner}, and any map of operads induces an adjunction between the corresponding algebra categories.
+\end{proof}
+
+Given a prop graph $G$, the free prop $\Free(G)$ has the same objects. The morphisms in $\Free(G)$ are given by monoidal string diagrams with boxes labeled in the edges of $G$, modulo an equivalence relation: any occurrence of parallel boxes labeled $e$ and $e'$ can be replaced by a single box labeled $e*e'$ and the resulting morphisms are made equal.
+
+\begin{equation}\label{eq:string-diagram}
+\begin{tikzpicture}[oriented WD,bb min width =.5cm, bbx=.5cm, bb port sep =1,bb port length=.08cm, bby=.15cm, baseline=(Y3)]
+\node [bb={1}{2}] (Y1) {\tiny $e_1$};
+\node [bb={1}{1},below=3 of Y1] (Y2) {\tiny $e_2$};
+\node [bb={2}{2}, below right = 0 and 1 of Y1] (Y3) {\tiny $e_3$};
+\node [bb={2}{1},right=3 of Y1] (Y4) {\tiny $e_4$};
+\node [bb={1}{1},right=3 of Y2] (Y5) {\tiny $e_5$};
+%
+\draw (Y1_in1) -- +(-3pt, 0);
+\draw (Y2_in1) -- +(-3pt, 0);
+\draw (Y1_out1) to (Y4_in1);
+\draw (Y1_out2) to (Y3_in1);
+\draw (Y2_out1) to (Y3_in2);
+\draw (Y3_out1) to (Y4_in2);
+\draw (Y3_out2) to (Y5_in1);
+\draw (Y4_out1)  -- +(3pt, 0);
+\draw (Y5_out1) -- +(3pt, 0);
+\end{tikzpicture}
+\quad=\quad
+\begin{tikzpicture}[oriented WD,bb min width =.5cm, bbx=.5cm, bb port sep =1,bb port length=.08cm, bby=.15cm, baseline=(Y3)]
+\node [bb={1}{2}] (Y1) {\tiny $e_1$};
+\node [bb={1}{1},below=3 of Y1] (Y2) {\tiny $e_2$};
+\node [bb={2}{2}, below right = 0 and 1 of Y1] (Y3) {\tiny $e_3$};
+\node [bb={3}{2},right=1 of Y3, inner ysep=.65cm] (Y45) {\tiny $e_4{*}e_5$};
+%
+\draw (Y1_in1) -- +(-3pt, 0);
+\draw (Y2_in1) -- +(-3pt, 0);
+\draw (Y1_out1) to (Y45_in1);
+\draw (Y1_out2) to (Y3_in1);
+\draw (Y2_out1) to (Y3_in2);
+\draw (Y3_out1) to (Y45_in2);
+\draw (Y3_out2) to (Y45_in3);
+\draw (Y45_out1)  -- +(3pt, 0);
+\draw (Y45_out2) -- +(3pt, 0);
+\end{tikzpicture}
+\end{equation}
+
+\begin{definition}[Event prop]\label{def:event-prop}
+Define the \emph{event prop} $\Event$ to be the free prop $\Free(G)$ on the prop graph of exchange events from \cref{ex:prop-graph}.  Its morphisms are multi-step trading histories: equivalence classes of string diagrams whose boxes are one-step exchange events.
+\end{definition}
+
+\begin{proposition}
+Every morphism $e\colon (I,x)\to (J,y)$ in the event prop has the same number of inputs as outputs, $I=J$, and satisfies value conservation. 
+
+Moreover, for each $i:I$ with $x_i=(A_i,\tau_i,a_i,v_i)$ and $y_i=(A_i, \tau_i, a_i', v_i')$, there exists a nonempty sequence of states and values $(a^1,v^1),\ldots,(a^{N+1},v^{N+1})$ such that $(a_i,v_i)=(a^1,v^1)$, $(a_i', v_i')=(a^{N+1},v^{N+1})$, and for each $1\leq n\leq N$:
+\[
+\begin{aligned}
+	\tau_i(a^n)&=(T^n,f^n),\where (t^n,x^n)\in T^nX,\\
+	t^n&=(v^n,v^{n+1}),\qand f^n(t^n,x^n)=a^{n+1}.
+\end{aligned}
+\]
+\end{proposition}
+\begin{proof}
+**
+\end{proof}
+
+The event prop $\Event$ contains all possible trading histories consistent with value conservation, trade realization, and update consistency: every way that agents could exchange resources, in any order, with any wiring.  Most of this is far too general to describe any particular economic setting.
+
+A \emph{market} should be some structured collection of events in $\Event$---the events that a particular mechanism permits.  The eventual goal of this work is to pick out collections corresponding to specific real-world markets, and to ask whether this framework can recover existing financial mathematics or reveal structure that was not visible before.
+
+We begin with a common mechanism: the central limit order book.
+
+\mygreen{Is the plan for Friday to discuss how to make CLOB into an example, or how to define ``a market" using the Event prop? I would love to have your help identifying avenues for defining / experimenting with equilibria.}
+
+%% ===================================================================
 \section*{Markets as Agents}
 %% ===================================================================
 
-Participants often reason about a market as though it has internal state and repeatable behavior: given exposed menus, it selects trades, supplies observations, and changes what it will do next.  This may describe an actual mechanism, such as an algorithmic exchange, or it may be a useful fiction induced by participants' modeling of the aggregate system.  The purpose of this section is to make that market-agent an object.  After recalling notation for polynomial functors on $\smset$, we use the tensor product in $\poly$ to package the finite participant context exposed to a market, and the internal hom into $\yon$ --- the dual --- to package the market's response rule.  The market-agent is then a coalgebra for the resulting polynomial, in direct parallel with the single-agent case.
+Before turning to central limit order books, we record a complementary viewpoint: participants often reason about a market as though it has internal state and repeatable behavior.  Given exposed menus, it selects trades, supplies observations, and changes what it will do next.  This may describe an actual mechanism, such as an algorithmic exchange, or it may be a useful fiction induced by participants' modeling of the aggregate system.  The purpose of this section is to make that market-agent an object.  After recalling notation for polynomial functors on $\smset$, we use the tensor product in $\poly$ to package the finite participant context exposed to a market, and the internal hom into $\yon$ --- the dual --- to package the market's response rule.  The market-agent is then a coalgebra for the resulting polynomial, in direct parallel with the single-agent case.
 
 \subsubsection*{Polynomial preliminaries}
 
@@ -808,143 +945,6 @@ We record the desired recombination as a conjectural target:
 \Cat{AgentWithoutPortfolio}\times\Cat{Portfolio}.
 \end{equation}
 The equivalence in \eqref{eq:portfolio-recombination-target} is not a theorem established here.  It states what the later development should prove once the portfolio category and the portfolio-free agents have been specified with enough structure.
-
-%% ===================================================================
-\section*{Markets via the event prop}
-%% ===================================================================
-
-The previous section modeled the market as a coalgebraic agent: a stateful rule that responds to the menus participants expose.  We now shift from modeling that market-agent object to modeling the compositional structure of trading histories themselves.  The basic units are one-step exchange events, and the event prop records how such events compose in parallel and in time.
-
-Our next goal is to define a colored prop with $\Set{Agent}$ as the set of colors.  Given $x\colon I\to\Set{Agent}$ and $y\colon J\to\Set{Agent}$, we write $(x,y)\colon I+J\to\Set{Agent}$ for their copairing.
-
-\begin{proposition}\label{prop:parallel}
-Given events $e\colon x\to x'$ and $f\colon y\to y'$, where $x,x'\colon I\to\Set{Agent}$ and $y,y'\colon J\to\Set{Agent}$, there exists an event
-\[(e,f)\colon (x,y)\to (x',y').\]
-\end{proposition}
-
-\begin{proof}
-We just need to check the requirements. Value conservation holds $\sum_{i\in I}v_i+\sum_{j\in J}v_j=\sum_{i\in I}v'_i+\sum_{j\in J}v'_j$, since each sum holds separately.  Trade realization and update consistency hold for each participant, since they hold in $e$ and $f$ respectively.
-\end{proof}
-
-
-\Cref{prop:parallel} shows that exchange events are closed under parallel composition.  They are \emph{not} closed under sequential composition in general. Suppose we have two events on the same agents and we attempt to compose them sequentially:
-\[
-\begin{tikzpicture}[oriented WD, bby=2.5ex, bbx=1.5cm, bb port sep=1, bb min width=1cm]
-  \node[bb={2}{2}] (E1) {$e_1$};
-  \node[bb={2}{2}, right=2 of E1] (E2) {$e_2$};
-  \draw (E1_in1) to +(-.4cm,0) node[left, font=\scriptsize] {$(a_1, v_1)$};
-  \draw (E1_in2) to +(-.4cm,0) node[left, font=\scriptsize] {$(a_2, v_2)$};
-  \draw (E1_out1) to node[above, font=\scriptsize] {$(a_1', v_1')$} (E2_in1);
-  \draw (E1_out2) to node[below, font=\scriptsize] {$(a_2', v_2')$} (E2_in2);
-  \draw (E2_out1) to +(.4cm,0) node[right, font=\scriptsize] {$(a_1'', v_1'')$};
-  \draw (E2_out2) to +(.4cm,0) node[right, font=\scriptsize] {$(a_2'', v_2'')$};
-\end{tikzpicture}
-\]
-Each event involves one update step from the coalgebras, whereas the proposed composite requires two steps. Indeed, if we tried to describe the composite as a single exchange event from $(a_i, v_i)$ to $(a_i'', v_i'')$, update consistency would require a trade-observation pair $(\bar t_i,\bar x_i)\in T_{a_i}X$ satisfying
-\[
-\bar t_i=(v_i,v_i'')\qand f_{a_i}(\bar t_i,\bar x_i)=a_i''.
-\]
-But the actual two-step path is obtained from trade-observation pairs $(t_i,x_i)\in T_{a_i}X$ and $(t_i',x_i')\in T_{a_i'}X$, with $t_i=(v_i,v_i')$ and $t_i'=(v_i',v_i'')$:
-\[
-a_i'' \;=\; f_{a_i'}(t_i',x_i'),\where a_i'=f_{a_i}(t_i,x_i).
-\]
-There need not be any one-step trade-observation pair $(\bar t_i,\bar x_i)$ with the required underlying trade and state update. Similarly, $(v_i, v_i'')$ may not even belong to $T_{a_i}$, so trade realization can also fail.
-
-Concretely: Alice and Bob trade in event $e_1$: Alice buys 3 shares at \$100 in state \texttt{eager} and transitions to \texttt{cautious}.  Then they trade again in event $e_2$, but now Alice's trade menu is different (buy up to 2 at $\leq\$98$ instead of up to 5 at $\leq\$102$).  No single event initiated when Alice's state is \texttt{eager} can capture this two-step history.
-
-We therefore seek a categorical structure that accommodates both parallel and sequential composition of events, without requiring sequential composites to be one-step events.
-
-\begin{definition}[Prop graph]\label{def:prop-graph}
-A \emph{prop graph} consists of a set $C$ of \emph{colors}, a set $E$ of \emph{edges} equipped with a monoid structure $(E,e_0,*)$, and monoid homomorphisms $\src,\tgt\colon E\to C^*$, where $C^*$ denotes the free monoid on~$C$.
-\end{definition}
-In other words, the source of each edge is a list of colors, and the source of the product of two edges is the list concatenation of the two source lists (and respectively for targets).
-
-\begin{example}\label{ex:prop-graph}
-Exchange events form a prop graph $G$ with color set $\Set{Agent}$, edge set the class of exchange events, source and target maps reading off the input and output agent families, and edge monoid given by \cref{prop:parallel}.
-\end{example}
-
-\begin{definition}[Prop]\label{def:prop}
-Let $C$ be a set.  A \emph{$C$-colored prop} is a strict monoidal category whose monoid of objects is the free monoid~$C^*$.
-\end{definition}
-
-As one might expect, there is an adjunction between prop graphs and props.
-
-\begin{theorem}[Free prop on a prop graph]\label{thm:free-prop}
-For any set $C$ the functor $U\colon\prop_C\to\propgr_C$ has a left adjoint
-\[
-\adj{\propgr_C}{\Free}{U}{\prop_C}
-\]
-and we call $\Free(G)\in\prop$ the \emph{free prop} on a prop graph $G$.
-\end{theorem}
-\begin{proof}
-The operad whose algebras are $C$-colored prop graphs embeds into the operad whose algebras are $C$-colored props \cite{PattersonSpivakVagner}, and any map of operads induces an adjunction between the corresponding algebra categories.
-\end{proof}
-
-Given a prop graph $G$, the free prop $\Free(G)$ has the same objects. The morphisms in $\Free(G)$ are given by monoidal string diagrams with boxes labeled in the edges of $G$, modulo an equivalence relation: any occurrence of parallel boxes labeled $e$ and $e'$ can be replaced by a single box labeled $e*e'$ and the resulting morphisms are made equal.
-
-\begin{equation}\label{eq:string-diagram}
-\begin{tikzpicture}[oriented WD,bb min width =.5cm, bbx=.5cm, bb port sep =1,bb port length=.08cm, bby=.15cm, baseline=(Y3)]
-\node [bb={1}{2}] (Y1) {\tiny $e_1$};
-\node [bb={1}{1},below=3 of Y1] (Y2) {\tiny $e_2$};
-\node [bb={2}{2}, below right = 0 and 1 of Y1] (Y3) {\tiny $e_3$};
-\node [bb={2}{1},right=3 of Y1] (Y4) {\tiny $e_4$};
-\node [bb={1}{1},right=3 of Y2] (Y5) {\tiny $e_5$};
-%
-\draw (Y1_in1) -- +(-3pt, 0);
-\draw (Y2_in1) -- +(-3pt, 0);
-\draw (Y1_out1) to (Y4_in1);
-\draw (Y1_out2) to (Y3_in1);
-\draw (Y2_out1) to (Y3_in2);
-\draw (Y3_out1) to (Y4_in2);
-\draw (Y3_out2) to (Y5_in1);
-\draw (Y4_out1)  -- +(3pt, 0);
-\draw (Y5_out1) -- +(3pt, 0);
-\end{tikzpicture}
-\quad=\quad
-\begin{tikzpicture}[oriented WD,bb min width =.5cm, bbx=.5cm, bb port sep =1,bb port length=.08cm, bby=.15cm, baseline=(Y3)]
-\node [bb={1}{2}] (Y1) {\tiny $e_1$};
-\node [bb={1}{1},below=3 of Y1] (Y2) {\tiny $e_2$};
-\node [bb={2}{2}, below right = 0 and 1 of Y1] (Y3) {\tiny $e_3$};
-\node [bb={3}{2},right=1 of Y3, inner ysep=.65cm] (Y45) {\tiny $e_4{*}e_5$};
-%
-\draw (Y1_in1) -- +(-3pt, 0);
-\draw (Y2_in1) -- +(-3pt, 0);
-\draw (Y1_out1) to (Y45_in1);
-\draw (Y1_out2) to (Y3_in1);
-\draw (Y2_out1) to (Y3_in2);
-\draw (Y3_out1) to (Y45_in2);
-\draw (Y3_out2) to (Y45_in3);
-\draw (Y45_out1)  -- +(3pt, 0);
-\draw (Y45_out2) -- +(3pt, 0);
-\end{tikzpicture}
-\end{equation}
-
-\begin{definition}[Event prop]\label{def:event-prop}
-Define the \emph{event prop} $\Event$ to be the free prop $\Free(G)$ on the prop graph of exchange events from \cref{ex:prop-graph}.  Its morphisms are multi-step trading histories: equivalence classes of string diagrams whose boxes are one-step exchange events.
-\end{definition}
-
-\begin{proposition}
-Every morphism $e\colon (I,x)\to (J,y)$ in the event prop has the same number of inputs as outputs, $I=J$, and satisfies value conservation. 
-
-Moreover, for each $i:I$ with $x_i=(A_i,\tau_i,a_i,v_i)$ and $y_i=(A_i, \tau_i, a_i', v_i')$, there exists a nonempty sequence of states and values $(a^1,v^1),\ldots,(a^{N+1},v^{N+1})$ such that $(a_i,v_i)=(a^1,v^1)$, $(a_i', v_i')=(a^{N+1},v^{N+1})$, and for each $1\leq n\leq N$:
-\[
-\begin{aligned}
-	\tau_i(a^n)&=(T^n,f^n),\where (t^n,x^n)\in T^nX,\\
-	t^n&=(v^n,v^{n+1}),\qand f^n(t^n,x^n)=a^{n+1}.
-\end{aligned}
-\]
-\end{proposition}
-\begin{proof}
-**
-\end{proof}
-
-The event prop $\Event$ contains all possible trading histories consistent with value conservation, trade realization, and update consistency: every way that agents could exchange resources, in any order, with any wiring.  Most of this is far too general to describe any particular economic setting.
-
-A \emph{market} should be some structured collection of events in $\Event$---the events that a particular mechanism permits.  The eventual goal of this work is to pick out collections corresponding to specific real-world markets, and to ask whether this framework can recover existing financial mathematics or reveal structure that was not visible before.
-
-We begin with a common mechanism: the central limit order book.
-
-\mygreen{Is the plan for Friday to discuss how to make CLOB into an example, or how to define ``a market" using the Event prop? I would love to have your help identifying avenues for defining / experimenting with equilibria.}
 
 %% ===================================================================
 \section*{Limit order events}
