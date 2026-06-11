@@ -961,6 +961,40 @@ We record the desired recombination as a conjectural target:
 The equivalence in \eqref{eq:portfolio-recombination-target} is not a theorem established here.  It states what the later development should prove once the portfolio category and the portfolio-free agents have been specified with enough structure.
 
 %% ===================================================================
+\section*{Events, revisited}
+\label{sec:events-revisited}
+%% ===================================================================
+
+The goal of this section is to restate the event conditions of \S2 using the market-agent vocabulary introduced above.  The original exchange-event definition records what happened to the participants; the market-agent version adds a witness for how the selected trades were produced.  Thus the \S2 definition is recovered by existentially forgetting that witness.
+
+Fix a finite participant list $I=\{1,\ldots,n\}$.  For each $i\in I$, let $(A_i,T^i_{-},f^i_{-})$ be the portfolio-free behavioral data of a \S1 agent, with initial state $a_i\in A_i$, post-state $a_i'\in A_i$, initial resource $r_i\in R$, and post-resource $r_i'\in R$.  Also fix a local observation $x_i\in X$ for each participant, and let $M$ be a market agent in state $m\in M$.  Suppressing the participant superscripts on menus and update maps, an \emph{event-with-market-agent} is such data satisfying:
+
+\begin{description}
+  \item[\quad Portfolio coherence.]
+  \[
+    \sum_{i\in I} r_i=\sum_{i\in I} r_i'.
+  \]
+
+  \item[\quad Agent behavior coherence.]
+  For each $i\in I$, the trade $t_i$ extracted from the market-agent response lies in $T_{a_i}$, realizes the resource change $t_i=(r_i,r_i')$, and updates the participant by
+  \[
+    f_{a_i}(t_i,x_i)=a_i'.
+  \]
+
+  \item[\quad Market-agent coherence.]
+  If $\epsilon_m$ is the response rule of the market state $m$, then at the participant context $(T_{a_1},\ldots,T_{a_n})$ it returns exactly
+  \[
+    \epsilon_m(T_{a_1},\ldots,T_{a_n})
+    =
+    ((t_1,x_1),\ldots,(t_n,x_n)).
+  \]
+\end{description}
+
+The exchange event of \S2 is the existential reading of this definition: it is the same participant data, with the market-agent omitted, satisfying portfolio coherence and agent behavior coherence, such that there exists some market agent in some state witnessing the market-agent coherence condition.
+
+Each generator of the event prop is a market-agent-witnessed event in this sense; the deeper rederivation of the generators and their relations is deferred to the next pass.
+
+%% ===================================================================
 \section*{Limit order events}
 %% ===================================================================
 
