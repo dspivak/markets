@@ -495,14 +495,14 @@ So an agent has a portfolio; it has some set of internal states; it has a tradin
 Fix a set $X$ of local observations.  An \emph{agent} consists of:
 \begin{itemize}[nosep]
 \item a set $A$ of \emph{states};
-\item for each state $a \in A$, a \emph{trade menu} $T_a \subseteq R \times R$;
-\item for each state $a \in A$, an \emph{update map} $f_a \colon T_a \times X \to A$.
+\item for each state $b \in A$, a \emph{trade menu} $T_b \subseteq R \times R$;
+\item for each state $b \in A$, an \emph{update map} $f_b \colon T_b \times X \to A$.
 \end{itemize}
 \end{definition}
 
 \medskip
 \textbf{Running example.}
-In this example, $X = 1$, so the update map collapses to $f_a \colon T_a \to A$; for a trade $t=(r,r')$, we write the update as $f_a(t)$.
+In this example, $X = 1$, so the update map at a state $b$ collapses to $f_b \colon T_b \to A$; for a trade $t=(r,r')$, we write the update as $f_b(t)$.
 Let $R = \mathbb{R}^2$ with coordinates $(c, q)$, where $c$ is cash and $q$ is the quantity of one asset.  Consider two agents, Alice and Bob, with initial portfolios $v_A = (1000, 0)$ and $v_B = (200, 20)$.
 
 \medskip
@@ -511,10 +511,10 @@ Let $R = \mathbb{R}^2$ with coordinates $(c, q)$, where $c$ is cash and $q$ is t
 \renewcommand{\arraystretch}{1.3}
 \begin{tabular}{p{2.2cm}p{5.8cm}p{5cm}}
 \hline
-State $a$ & Trade menu $T_a$ & Transition $f_a(t)$ \\
+State $b$ & Trade menu $T_b$ & Transition $f_b(t)$ \\
 \hline
-$\texttt{eager}$ & buy up to 5 shares at $\leq\$102$ each & $\texttt{cautious}$ for all $(v,v') \in T_a$ \\
-$\texttt{cautious}$ & buy up to 2 shares at $\leq\$98$ each & $\texttt{cautious}$ for all $(v,v') \in T_a$ \\
+$\texttt{eager}$ & buy up to 5 shares at $\leq\$102$ each & $\texttt{cautious}$ for all $t \in T_{\texttt{eager}}$ \\
+$\texttt{cautious}$ & buy up to 2 shares at $\leq\$98$ each & $\texttt{cautious}$ for all $t \in T_{\texttt{cautious}}$ \\
 \hline
 \end{tabular}
 \end{center}
@@ -525,9 +525,9 @@ $\texttt{cautious}$ & buy up to 2 shares at $\leq\$98$ each & $\texttt{cautious}
 \renewcommand{\arraystretch}{1.3}
 \begin{tabular}{p{2.2cm}p{5.8cm}p{5cm}}
 \hline
-State $a$ & Trade menu $T_a$ & Transition $f_a(t)$ \\
+State $b$ & Trade menu $T_b$ & Transition $f_b(t)$ \\
 \hline
-$\texttt{hold}$ & sell up to 10 shares at $\geq\$100$ each & $\texttt{hold}$ for all $(v,v') \in T_a$ \\
+$\texttt{hold}$ & sell up to 10 shares at $\geq\$100$ each & $\texttt{hold}$ for all $t \in T_{\texttt{hold}}$ \\
 \hline
 \end{tabular}
 \end{center}
@@ -812,7 +812,7 @@ P_X \coloneqq \sum_{T\subseteq R\times R} \yon^{T X}.
 \]
 Here juxtaposition $TX$ in the exponent denotes the cartesian product $T\times X$; we use this convention for products of direction sets throughout.  A place of $P_X$ is a trade menu $T\subseteq R\times R$.  The directions at that menu are $T X$: an acceptable trade together with a local observation.  This matches the agent data of \S1, with the local observation set $X$ playing its assigned role.
 
-For any set $A$, the polynomial $A\yon^A$ has position set $A$ and constant direction set $A$ at every position.  A coalgebra $A\yon^A \to p$ is, by direct evaluation at $A$, a function $A \to p(A)$.  The Definition below records the unpacking for $p = P_X$: each state $a\in A$ becomes a choice of trade menu and an update map into $A$.
+For any set $A$, the polynomial $A\yon^A$ has position set $A$ and constant direction set $A$ at every position.  A coalgebra $A\yon^A \to p$ is, by direct evaluation at $A$, a function $A \to p(A)$.  The Definition below records the unpacking for $p = P_X$: each state $b\in A$ becomes a choice of trade menu and an update map into $A$.
 
 \begin{definition}[Agent without portfolio]\label{def:agent-without-portfolio}
 An \emph{agent without portfolio} is a coalgebra
@@ -829,17 +829,17 @@ Evaluating the internal hom at $A$ collapses the curried form:
 \]
 Unfolding $P_X(A) = \sum_{T\subseteq R\times R} A^{T X}$ and distributing over the $A$-indexed product gives the concrete description
 \[
-P_X(A)^A \cong \prod_{a\in A}\sum_{T\subseteq R\times R}A^{T X}.
+P_X(A)^A \cong \prod_{b\in A}\sum_{T\subseteq R\times R}A^{T X}.
 \]
-Thus each state $a\in A$ chooses a trade menu $T_a\subseteq R\times R$ and an update map
+Thus each state $b\in A$ chooses a trade menu $T_b\subseteq R\times R$ and an update map
 \[
-T_a X\to A.
+T_b X\to A.
 \]
-The name \emph{without portfolio} records that no current holding $r \in R$ is part of the agent state: $A$ stores only the agent's internal state, and the menu $T_a$ lists candidate resource replacements without specifying which holding the agent currently has.  The directions in $T_a X$, written $(t,x)$, encode an executed trade $t$ together with the agent's local observation $x$.
+The name \emph{without portfolio} records that no current holding $r \in R$ is part of the agent state: $A$ stores only the agent's internal state, and the menu $T_b$ lists candidate resource replacements without specifying which holding the agent currently has.  The directions in $T_b X$, written $(t,x)$, encode an executed trade $t$ together with the agent's local observation $x$.
 \end{definition}
 
 \begin{example}\label{ex:agent-without-portfolio}
-Take $X = 1$, so each direction is a trade alone.  Alice from Example~\ref{ex:event} becomes an agent-without-portfolio with state set $A_{\mathrm{Alice}} = \{\texttt{eager}, \texttt{cautious}\}$, menus $T_{\texttt{eager}}$ (buy up to 5 shares at $\leq \$102$) and $T_{\texttt{cautious}}$ (buy up to 2 shares at $\leq \$98$), and update maps $T_a \to A_{\mathrm{Alice}}$ sending every direction to $\texttt{cautious}$.  Bob has state set $\{\texttt{hold}\}$, single menu $T_{\texttt{hold}}$ (sell up to 10 shares at $\geq \$100$), and update returning to $\texttt{hold}$.  The portfolios $(1000,0)$ and $(200,20)$ live outside the state sets; events act on them.  Example~\ref{ex:market-agent} below extends this picture to a market-agent producing the event of Example~\ref{ex:event}.
+Take $X = 1$, so each direction is a trade alone.  Alice from Example~\ref{ex:event} becomes an agent-without-portfolio with state set $A_{\mathrm{Alice}} = \{\texttt{eager}, \texttt{cautious}\}$, menus $T_{\texttt{eager}}$ (buy up to 5 shares at $\leq \$102$) and $T_{\texttt{cautious}}$ (buy up to 2 shares at $\leq \$98$), and update maps $T_b \to A_{\mathrm{Alice}}$ sending every direction to $\texttt{cautious}$.  Bob has state set $\{\texttt{hold}\}$, single menu $T_{\texttt{hold}}$ (sell up to 10 shares at $\geq \$100$), and update returning to $\texttt{hold}$.  The portfolios $(1000,0)$ and $(200,20)$ live outside the state sets; events act on them.  Example~\ref{ex:market-agent} below extends this picture to a market-agent producing the event of Example~\ref{ex:event}.
 \end{example}
 
 \subsubsection*{The market-agent polynomial}
