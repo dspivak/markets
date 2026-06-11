@@ -492,18 +492,20 @@ So an agent has a portfolio; it has some set of internal states; it has a tradin
 
 
 \begin{definition}
-Fix a set $X$ of local observations.  An \emph{agent} consists of:
-\begin{itemize}[nosep]
+Fix a set $X$ of local observations.  An \emph{agent} of type $X$ consists of:
+\begin{enumerate}[nosep]
+\item a current portfolio $r\in R$;
 \item a set $A$ of \emph{states};
+\item a current state $a\in A$;
 \item for each state $b \in A$, a \emph{trade menu} $T_b \subseteq R \times R$;
 \item for each state $b \in A$, an \emph{update map} $f_b \colon T_b \times X \to A$.
-\end{itemize}
+\end{enumerate}
 \end{definition}
 
 \medskip
 \textbf{Running example.}
 In this example, $X = 1$, so the update map at a state $b$ collapses to $f_b \colon T_b \to A$; for a trade $t=(r,r')$, we write the update as $f_b(t)$.
-Let $R = \mathbb{R}^2$ with coordinates $(c, q)$, where $c$ is cash and $q$ is the quantity of one asset.  Consider two agents, Alice and Bob, with initial portfolios $v_A = (1000, 0)$ and $v_B = (200, 20)$.
+Let $R = \mathbb{R}^2$ with coordinates $(c, q)$, where $c$ is cash and $q$ is the quantity of one asset.  Consider two agents, Alice and Bob, initially in states \texttt{eager} and \texttt{hold}, with portfolios $v_A = (1000, 0)$ and $v_B = (200, 20)$.
 
 \medskip
 \noindent\textbf{Alice} has state space $A = \{\texttt{eager},\,\texttt{cautious}\}$:
