@@ -1154,14 +1154,6 @@ Without state, limit order events compose trivially---everything collapses to a 
 %% ===================================================================
 
 \begin{question}
-The polynomial functor $P_X(A) = \sum_{T \subseteq R \times R} A^{T X}$ does not appear to carry comonad structure: a counit $\varepsilon\colon P_X \to \mathrm{Id}$ would require extracting an element of $A$ from a pair $(T, f\colon T X \to A)$, but $T X$ may be empty.  What changes if we require every direction set $T X$ to be nonempty?  In the special case $X=1$, this amounts to requiring every trade menu to be nonempty, for instance by making the null trade always available.  Would $P_X$ then be a comonad, and would the coalgebra condition be meaningful?
-\end{question}
-
-\begin{question}
-Value conservation is a local, instantaneous conservation law.  It would only amount to a global conservation law if $R$ captured all resources in the economy.  What happens when multiple event props, over different resource sets, interact?  Is there a meaningful notion of ``open system'' in which local conservation holds but global conservation can fail?
-\end{question}
-
-\begin{question}
 In the special case $X=1$, one-step events in $\Event$ are closed under sequential composition if and only if the coalgebra satisfies
 \[
 f_{f_a(t_{12})}(t_{23}) \;=\; f_a(t_{13})
@@ -1173,13 +1165,6 @@ f_{f_a(t_{12},x_{12})}(t_{23},x_{23}) \;=\; f_a(t_{13},x_{13}).
 Characterize the $P_X$-coalgebras satisfying the appropriate condition.  Does it coincide with a known categorical notion?
 \end{question}
 
-\begin{question}
-What natural quotients of $\Event$ are economically meaningful?  Identifying morphisms with the same endpoints gives a preorder; is there an intermediate quotient that retains some causal structure?
-\end{question}
-
-\begin{question}
-A stateful limit order agent determines a $P_X$-coalgebra with limit-order-shaped trade menus.  Is there a useful functor in the reverse direction---from general $P_X$-coalgebras to stateful limit order agents?  A coalgebraic agent may exhibit cyclic trade preferences (willing to trade $A \to B$, $B \to C$, $C \to A$) that no limit order can represent, suggesting no such functor exists in general.
-\end{question}
 
 \section*{Acknowledgments}
 The authors thank Andrea Abeje-Stine for interesting conversations.
