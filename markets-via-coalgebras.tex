@@ -466,7 +466,7 @@ citecolor=orange!50!black, urlcolor=orange!50!black, pdfencoding=unicode]{hyperr
 \maketitle
 
 \begin{abstract}
-
+\noindent Defines a general class of agents, markets, and market equilibrium state using category theory and polynomial functors.
 \end{abstract}
 
 Fix a resource set $R$ carrying the structure of a commutative monoid $(R,+,0)$, so that holdings combine additively.  The default mental picture is the free commutative monoid on a set of named resources: each holding is a finite formal sum $\sum_i n_i r_i$ with non-negative integer multiplicities $n_i$.  Taking $R$ to be a group instead introduces negative elements, which model idealized debt.  Taking rational coefficients allows fractional holdings for all assets in every trade scenario.  We model economic agents as coalgebras for a polynomial endofunctor on $\smset$, and trading events as generators of a free colored prop.  We will define a market as a sub-prop of events, for example as selected by some mechanism such as a central limit order book.
