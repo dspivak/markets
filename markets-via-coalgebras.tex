@@ -539,9 +539,9 @@ $\texttt{hold}$ & sell up to 10 shares at $\geq\$100$ each & $\texttt{hold}$ for
 %% ===================================================================
 
 \textbf{Informal picture.}
-An event involves some number of agents simultaneously.  Each agent enters with a current state and a current portfolio and exits with a (possibly different) state and portfolio.  The underlying agent data from \S1---state set, trade menus, and update maps---does not change during an event.  What can change is the distribution of resources and the state of each agent.
+An event involves some number of agents simultaneously.  Each agent enters with a current state and a current portfolio and exits with a (possibly different) state and portfolio.  The underlying behavioral data from \S1---state set, trade menus, and update maps---does not change during an event.  What can change is the distribution of resources and the state of each agent.
 
-Let $\Set{Agent}$ denote the class of all tuples $(A, \tau, a, v)$ where $\tau$ packages the \S1 agent data on $A$, $a\in A$ is a state, and $v\in R$ is a portfolio; we call these \emph{agents}.  We draw an event as a box, as will later be used in string diagrams.  Each wire carries an agent.  Wires entering from the left are the agents before the event; wires exiting to the right are the agents after.
+Let $\Set{Agent}$ denote the class of all tuples $(A, \tau, a, v)$ where $\tau$ represents the portfolio-free behavioral data $(T_-,f_-)$ on $A$, $a\in A$ is the current state, and $v \in R$ is the current portfolio.  We draw an event as a box, as will later be used in string diagrams.  Each wire carries an agent.  Wires entering from the left are the agents before the event; wires exiting to the right are the agents after.
 
 \[
 \begin{tikzpicture}[oriented WD, bby=2.5ex, bbx=1.5cm, bb port sep=1.5, bb min width=1.2cm]
@@ -554,10 +554,10 @@ Let $\Set{Agent}$ denote the class of all tuples $(A, \tau, a, v)$ where $\tau$ 
   \node[above right=-9pt and 0] at ($(E_out1)!.5!(E_out2)$) {$\vdots$};
 \end{tikzpicture}
 \]
-There will be three conditions for this to be a valid event, namely that there is no overall change in the amount of assets, that each selected trade lies in the agent's current menu, and that each agent updated to a new state according to its current update map and local observation.
+There will be three conditions for such a box to be a valid economic event: that there is no change between total assets entering and exiting the event, that each selected trade lies in the agent's current menu, and that each agent's current state when exiting the event is determined by their update map and local observation applied to the trade they participated in.
 \begin{definition}
-Let $x,x'\colon I\to\Set{Agent}$ with $x(i)=(A_i,\tau_i,a_i,v_i)$ and $x'(i)=(A_i,\tau_i,a_i',v_i')$ for each $i\in I$, and write $(T_i,f_i)\coloneqq\tau_i(a_i)$.  An \emph{exchange event}
-\[e\colon x\to x'\]
+Let $x,x'\colon I\to\Set{Agent}$ with $x(i)=(A_i,\tau_i,a_i,v_i)$ and $x'(i)=(A_i,\tau_i,a_i',v_i')$ for each $i\in I$, and write $(T_i,f_i)\coloneqq\tau_i(a_i)$.  An \emph{exchange event}, written
+\[e\colon x\to x',\]
 consists of trade-observation pairs $(t_i,x_i)\in T_i\times X$ for each $i\in I$ such that three conditions hold:
 \begin{description}
 	\item[\quad Value conservation:] $\sum_{i\in I} v_i=\sum_{i\in I}v_i'$
@@ -567,7 +567,6 @@ consists of trade-observation pairs $(t_i,x_i)\in T_i\times X$ for each $i\in I$
 \end{definition}
 
 \mygreen{Note: Some markets charge a fee, or even destroy assets, which seems to violate conservation; but these can be modeled via Conservation by including extra agents that "belong to market" or that ``take ownership" of destroyed assets, as happens explicitly on the Ethereum network.}
-
 \mygreen{Note: This conservation law is local, and does not imply a global conservation of value.}
 
 
@@ -812,7 +811,7 @@ Define
 \[
 P_X \coloneqq \sum_{T\subseteq R\times R} \yon^{T X}.
 \]
-Here juxtaposition $TX$ in the exponent denotes the cartesian product $T\times X$; we use this convention for products of direction sets throughout.  A place of $P_X$ is a trade menu $T\subseteq R\times R$.  The directions at that menu are $T X$: an acceptable trade together with a local observation.  This matches the agent data of \S1, with the local observation set $X$ playing its assigned role.
+Here juxtaposition $TX$ in the exponent denotes the cartesian product $T\times X$; we use this convention for products of direction sets throughout.  A place of $P_X$ is a trade menu $T\subseteq R\times R$.  The directions at that menu are $T X$: an acceptable trade together with a local observation.  This matches the portfolio-free behavioral component of the agent data of \S1, with the local observation set $X$ playing its assigned role.
 
 For any set $A$, the polynomial $A\yon^A$ has position set $A$ and constant direction set $A$ at every position.  A coalgebra $A\yon^A \to p$ is, by direct evaluation at $A$, a function $A \to p(A)$.  The Definition below records the unpacking for $p = P_X$: each state $b\in A$ becomes a choice of trade menu and an update map into $A$.
 
