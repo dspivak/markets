@@ -476,8 +476,20 @@ In what follows, we fix a resource set $R$ carrying the structure of a commutati
 \section*{Agents}
 %% ===================================================================
 
-\textbf{Informal picture.}
-An agent has an internal state---encoding its beliefs, risk limits, and inventory constraints---and a trading policy that depends on that state.  In each state, rather than assuming it has a partial order on all possible resources defined by a utility function, we assume less: the agent knows which trades it is willing to accept; whenever an acceptable trade is executed, the agent's state updates deterministically according to the information made available by the event.
+\textbf{What are we trying to model?}
+
+\noindent An economic agent has: 
+\begin{enumerate}
+	\item a portfolio
+	\item \label{itm:state} beliefs, risk limits, things like inventory contraints
+	\item some way to make trading decisions that depends on \ref{itm:state}
+	\item some way to update its beliefs/risk limits/inventory constraints after making a trade
+	\item some way to incorporate observations about the world when making those updates.
+\end{enumerate}
+
+So an agent has a portfolio; it has some set of internal states; it has a trading policy that depends on its state. Rather than assuming that every agent has a coherent theory of market prices encoded in a utility function, we ask less of an economic agent: the agent only needs to know which trades it is willing to accept. Whenever an acceptable trade is executed, the agent's state updates deterministically according to the information made available by the event.
+
+
 
 \begin{definition}
 Fix a set $X$ of local observations.  An \emph{agent} consists of:
