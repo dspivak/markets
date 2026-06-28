@@ -600,7 +600,7 @@ Alice is in state \texttt{eager} with portfolio $v_A = (1000, 0)$; Bob is in sta
 \end{example}
 
 %% ===================================================================
-\section*{Markets via the event prop}
+\section*{The event prop}
 %% ===================================================================
 
 Exchange events capture one-step resource transfers between current agents.  We now pass from individual events to the compositional structure of trading histories themselves.  The basic units are one-step exchange events, and the event prop records how such events compose in parallel and in time.
@@ -728,13 +728,11 @@ Moreover, for each $i:I$ with $x_i=(A_i,\tau_i,a_i,v_i)$ and $y_i=(A_i, \tau_i, 
 **
 \end{proof}
 
-The event prop $\Event$ contains all possible trading histories consistent with value conservation, trade realization, and update consistency: every way that agents could exchange resources, in any order, with any wiring.  Most of this is far too general to describe any particular economic setting.
+The event prop $\Event$ contains all possible trading histories consistent with value conservation, trade realization, and update consistency: every way that agents could exchange resources, in any order, with any wiring.
 
-A \emph{market} should be some structured collection of events in $\Event$---the events that a particular mechanism permits.  The eventual goal of this work is to pick out collections corresponding to specific real-world markets, and to ask whether this framework can recover existing financial mathematics or reveal structure that was not visible before.
+A \emph{market} should be some structured collection of events in $\Event$---the events that a particular market mechanism permits.  The eventual goal of this work is to pick out collections corresponding to specific real-world markets, and to ask whether this framework can recover existing financial mathematics or reveal structure that was not visible before.
 
-We begin with a common mechanism: the central limit order book.
-
-\mygreen{Is the plan for Friday to discuss how to make CLOB into an example, or how to define ``a market" using the Event prop? I would love to have your help identifying avenues for defining / experimenting with equilibria.}
+We begin by formalizing the intuition that different markets ``act" in different ways.
 
 %% ===================================================================
 \section*{Markets as Agents}
