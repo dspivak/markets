@@ -738,80 +738,125 @@ We begin by formalizing the intuition that different markets ``act" in different
 \section*{Markets as Agents}
 %% ===================================================================
 
-Before turning to central limit order books, we record a complementary viewpoint: participants often reason about a market as though it has internal state and repeatable behavior.  Given exposed menus, it selects trades, supplies observations, and changes what it will do next.  This may describe an actual mechanism, such as an algorithmic exchange, or it may be a useful fiction induced by participants' modeling of the aggregate system.  The purpose of this section is to make that market-agent an object.  After recalling notation for polynomial functors on $\smset$, we use the tensor product in $\poly$ to package the finite participant context exposed to a market, and the internal hom into $\yon$ --- the dual --- to package the market's response rule.  The market-agent is then a coalgebra for the resulting polynomial, in direct parallel with the single-agent case.
+\textbf{Informal picture.}
+Participants often reason about a market as though it has internal state and repeatable behavior.  Given exposed trade menus, the market selects trades, supplies observations, and changes what it will do next.  This may describe an actual mechanism, such as an algorithmic exchange, or it may be a useful fiction induced by participants' modeling of the aggregate system.
 
-\subsubsection*{Polynomial preliminaries}
+The purpose of this section is to make that market-agent visible before introducing the formal notation.  An ordinary agent has a state, a trade menu in each state, and an update rule.  A market-agent has the same shape of description at the next scale: it has a market state, a rule for responding to the finite list of menus currently exposed by the participants, and an update rule for its own state.
 
-This subsection fixes notation for $\poly$ and introduces the four constructions used throughout this section: the underlying notation $p=\sum_{i:p(1)}\yon^{p[i]}$ for polynomial functors, the tensor product $\otimes$ used to package finite participant contexts, the internal hom $[-,-]$ used to curry the agent definition, and the dual $(-)^\vee$ used to package the market-agent's response rule.
+\begin{center}
+\begin{tikzpicture}[oriented WD, bby=2.5ex, bbx=1.5cm, bb port sep=1.3, bb min width=2.2cm]
+  \node[bb={3}{3}] (M) {market-agent};
+  \draw (M_in1) to +(-.8cm,0) node[left, font=\scriptsize] {$T_{a_1}$};
+  \draw (M_in2) to +(-.8cm,0) node[left, font=\scriptsize] {$T_{a_2}$};
+  \draw (M_in3) to +(-.8cm,0) node[left, font=\scriptsize] {$T_{a_n}$};
+  \draw (M_out1) to +(.8cm,0) node[right, font=\scriptsize] {$(t_1,x_1)$};
+  \draw (M_out2) to +(.8cm,0) node[right, font=\scriptsize] {$(t_2,x_2)$};
+  \draw (M_out3) to +(.8cm,0) node[right, font=\scriptsize] {$(t_n,x_n)$};
+  \node[font=\scriptsize] at ($(M_in2)!.5!(M_in3)+(-.8cm,0)$) {$\vdots$};
+  \node[font=\scriptsize] at ($(M_out2)!.5!(M_out3)+(.8cm,0)$) {$\vdots$};
+  \node[above=1.2ex of M, font=\scriptsize] {market state $m$};
+  \node[below=1.2ex of M, font=\scriptsize] {updates to $m'$};
+\end{tikzpicture}
+\end{center}
 
-\emph{Objects of $\poly$.}  An object of the category $\poly$ is a functor built from sums of representable functors, and we write it as
+\textbf{Separating behavior from holdings.}
+For this step we temporarily separate an agent's behavioral state from its current portfolio.  In state $b\in A$, an agent exposes a menu $T_b\subseteq R\times R$ of acceptable visible swaps and has an update map
 \[
-p=\sum_{i:p(1)}\yon^{p[i]}.
+T_b\times X\to A.
 \]
-The set $p(1)$ is called the set of \emph{places} or \emph{positions} of $p$.  For a place $i:p(1)$, the set $p[i]$ is called the set of \emph{directions} at $i$.  Evaluating $p$ at a set $A$ gives
-\[
-p(A)\cong \sum_{i:p(1)}A^{p[i]}.
-\]
-Thus an element of $p(A)$ is a position together with an $A$-labeled response to every direction available there.
+A direction $(t,x)$ records the trade $t=(g,h)$ that was executed---give $g$, receive $h$---together with the local observation $x$ supplied to the agent.  The current portfolio is not discarded; it is carried alongside the state and is changed by events.  The point of the temporary separation is that the behavioral part can be packaged first, and portfolios can then be reintroduced as an additional component.
 
-\emph{Maps in $\poly$.}  A map $p\to q$ is a natural transformation of functors.  Evaluating at $1$ gives its forward action on positions, $p(1)\to q(1)$; once a position $i$ of $p$ is sent to a position $j$ of $q$, the component over that summand is a natural transformation $\yon^{p[i]}\to\yon^{q[j]}$, which by the Yoneda lemma is a map $q[j]\to p[i]$ of direction sets.  Thus maps in $\poly$ send positions forward and directions backward:
-\[
-\poly(p,q)\cong
-\prod_{i:p(1)}\sum_{j:q(1)}p[i]^{q[j]}.
-\]
-We will also use the form in which each function $q[j]\to p[i]$ from $q$-directions to $p$-directions is spelled out as a product over its inputs:
-\[
-\poly(p,q)\cong
-\prod_{i:p(1)}\sum_{j:q(1)}
-\prod_{d\in q[j]}\sum_{e\in p[i]}1.
-\]
-The trailing $1$ records that there is no further data once a $p$-direction $e$ has been chosen for each $q$-direction $d$.  The internal hom below is obtained by promoting that $1$ to a representable.
+\begin{example}\label{ex:agent-without-portfolio}
+Take $X = 1$, so each direction is a trade alone.  Alice from Example~\ref{ex:event} has state set $A_{\mathrm{Alice}} = \{\texttt{eager}, \texttt{cautious}\}$, menus $T_{\texttt{eager}}$ (buy up to 5 shares at $\leq \$102$) and $T_{\texttt{cautious}}$ (buy up to 2 shares at $\leq \$98$), and update maps $T_b \to A_{\mathrm{Alice}}$ sending every direction to $\texttt{cautious}$.  Bob has state set $\{\texttt{hold}\}$, single menu $T_{\texttt{hold}}$ (sell up to 10 shares at $\geq \$100$), and update returning to $\texttt{hold}$.  The portfolios $(1000,0)$ and $(200,20)$ live outside the state sets; events act on them.
+\end{example}
 
-\emph{Tensor product.}  The tensor product puts two polynomials side by side:
+\textbf{Exposed menus and market response.}
+A market mediates many exposed menus at once.  If $n$ participants expose menus $(T_1,\ldots,T_n)$, then a market response chooses one trade-and-observation pair from each menu:
 \[
-p\otimes q
-\coloneqq
-\sum_{\substack{i:p(1)\\ j:q(1)}}\yon^{p[i]q[j]}.
+((t_1,x_1),\ldots,(t_n,x_n))\in T_1X\cdots T_nX.
 \]
-A place of $p\otimes q$ is a pair $(i,j)$ of places, and a direction at $(i,j)$ is a pair $(d_i,d_j)$ of directions, one at $i$ and one at $j$.  Iterating gives the tensor power $p^{\otimes n}$, used below to package $n$ exposed menus at once.
+Here $T_iX$ denotes $T_i\times X$.  Such a response is exactly the extra mechanism-side data missing from a bare exchange event: the event records what happened to the agents, while the market response records how the selected trades were produced from the exposed menus.
 
-\emph{Internal hom $[p,q]$.}  We want a polynomial $[p,q]$ whose positions are the maps $p\to q$ in $\poly$ and whose directions, at each such position, record which piece of map-data is being queried.  Starting from the second form of $\poly(p,q)$ above, the move is to replace the trailing singleton $1$ by the representable $\yon$, so that each $(d,e)$ choice contributes one direction rather than no data:
+A market-agent is the stateful object that answers every finite menu context.  In market state $m$, it has a response rule
 \[
-[p,q]\cong
-\prod_{i:p(1)}\sum_{j:q(1)}
-\prod_{d\in q[j]}\sum_{e\in p[i]}\yon.
+\epsilon_m(T_1,\ldots,T_n)=((t_1,x_1),\ldots,(t_n,x_n))
 \]
-Distributing products over sums puts this in polynomial normal form:
+and an update rule
 \[
-[p,q]
-\coloneqq
-\sum_{\varphi\in\prod_{i:p(1)}\sum_{j:q(1)}p[i]^{q[j]}}
-\yon^{\sum_{i:p(1)}q[\varphi(i)]},
+u_m(T_1,\ldots,T_n)=m'
 \]
-where if $\varphi(i)=(j_i,\beta_i)$ then $q[\varphi(i)]$ means $q[j_i]$.  Informally: \emph{a position of $[p,q]$ assigns, to each place $i$ of $p$, a place $j_i$ of $q$ together with an answer in $p[i]$ to every direction of $q$ at $j_i$; a direction of $[p,q]$ names a place $i$ of $p$ together with one such $q$-direction at $j_i$.}
+sending the presented menu context to the next market state.  Different state spaces, response rules, and update rules model different mechanisms.  For a centralized exchange such as an NYSE-style central limit order book, the market agent may be close to literal: the market state can include book state and the response rule can encode matching behavior.  For a decentralized system such as Bitcoin, there need not be one literal market agent; different choices of state space can model miners, mempool state, block selection, or the aggregate mechanism that participants use as a predictive fiction --- i.e.\ the global state of the blockchain, or the global ledger.
 
-\emph{Dual.}  The dual $p^\vee$ packages a \emph{response rule} to $p$: a way of answering every position $i$ of $p$ with one of its own directions, without committing to any output polynomial.  It is the special case of the internal hom in which the output is $\yon$:
+\begin{example}\label{ex:market-agent}
+Three market-agents, given the same exposed menus from Alice and Bob, can produce events with different relationships.  $M_1$ and $M_2$ produce two different events.  $M_1$ and $M_1'$ are different market-agents producing the same event, illustrating that a single one-step observation does not determine the market-agent.
+
+Reuse Alice (state \texttt{eager}, portfolio $v_A = (1000, 0)$) and Bob (state \texttt{hold}, portfolio $v_B = (200, 20)$) from Example~\ref{ex:event}.  Take $X = 1$, so there are no local observations and a response rule is a tuple of trades alone.  The exposed menus form the 2-participant context $(T_{\texttt{eager}}, T_{\texttt{hold}})$.  Matching buy/sell pairs in $T_{\texttt{eager}} \times T_{\texttt{hold}}$ that conserve value are parametrized by a quantity $q \in \{1,\ldots,5\}$ and a price $p \in [100, 102]$: Alice's trade is $((pq,0),(0,q))$ and Bob's is $((0,q),(pq,0))$.
+
+\medskip
+\noindent\textbf{Market-agent $M_1$ (passive matcher).}  Let $M_1 = \{\texttt{ready}\}$ with response rule
 \[
-p^\vee\coloneqq [p,\yon].
+\epsilon^{(1)}_{\texttt{ready}}(T_{\texttt{eager}}, T_{\texttt{hold}})
+=\big(\,((300,0),(0,3)),\;((0,3),(300,0))\,\big)
 \]
-Since $\yon$ has one place and one direction, substituting $q=\yon$ in the formula for $[p,q]$ collapses three pieces of the position data.  The choice $\sum_{j:q(1)}$ becomes a singleton (there is no $q$-place to choose).  The product $\prod_{d\in q[j]}$ becomes a singleton (there is no $q$-direction to answer for).  What remains of a position is a single element of $p[i]$ for each $i$ --- i.e.\ an element $\varepsilon\in\prod_{i:p(1)} p[i]$.  The exponent likewise collapses: $\sum_{i:p(1)} q[\varphi(i)] = \sum_{i:p(1)} 1 = p(1)$.  This gives
+(quantity $q=3$ at price $p=100$) and update $u^{(1)}_{\texttt{ready}}(T_{\texttt{eager}}, T_{\texttt{hold}}) = \texttt{ready}$.  This market-agent produces exactly the event $e_1$ of Example~\ref{ex:event}.
+
+\medskip
+\noindent\textbf{Market-agent $M_2$ (aggressive midpoint).}  Let $M_2 = \{\texttt{ready}\}$ with
 \[
-p^\vee\cong
-\sum_{\varepsilon\in\prod_{i:p(1)}p[i]}\yon^{p(1)}.
+\epsilon^{(2)}_{\texttt{ready}}(T_{\texttt{eager}}, T_{\texttt{hold}})
+=\big(\,((505,0),(0,5)),\;((0,5),(505,0))\,\big)
 \]
-Read in parallel with the internal-hom gloss above: \emph{a position of $p^\vee$ assigns, to each place $i$ of $p$, a single direction of $p$ --- there is no $q$-place to choose and no $q$-direction to answer for; a direction of $p^\vee$ names the place $i$ being answered.}  This is the event-side construction we need: it packages a rule for responding to any possible agent-side position.
+(quantity $q=5$ at price $p=101$) and $u^{(2)}_{\texttt{ready}}(\cdot) = \texttt{ready}$.  This produces a different event $e_2$:
+
+\begin{center}
+\begin{tikzpicture}[oriented WD, bby=2.5ex, bbx=1.5cm, bb port sep=1, bb min width=1.2cm]
+  \node[bb={2}{2}] (E) {$e_2$};
+  \draw[blue!70!black] (E_in1) to +(-.4cm,0) node[left, font=\scriptsize, text=blue!70!black] {Alice: $(\texttt{eager},\;(1000,0))$};
+  \draw[red!60!black] (E_in2) to +(-.4cm,0) node[left, font=\scriptsize, text=red!60!black] {Bob: $(\texttt{hold},\;(200,20))$};
+  \draw[blue!70!black] (E_out1) to +(.4cm,0) node[right, font=\scriptsize, text=blue!70!black] {$(\texttt{cautious},\;(495,5))$};
+  \draw[red!60!black] (E_out2) to +(.4cm,0) node[right, font=\scriptsize, text=red!60!black] {$(\texttt{hold},\;(705,15))$};
+\end{tikzpicture}
+\end{center}
+
+\medskip
+\noindent\textbf{Market-agent $M_1'$ (richer state, same one-step output).}  Let $M_1' = \{\texttt{ready},\,\texttt{aggressive}\}$ with initial state $\texttt{ready}$ and response rules
+\begin{align*}
+\epsilon^{(1')}_{\texttt{ready}}(T_{\texttt{eager}}, T_{\texttt{hold}})
+&=\big(\,((300,0),(0,3)),\;((0,3),(300,0))\,\big),\\
+\epsilon^{(1')}_{\texttt{aggressive}}(T_{\texttt{eager}}, T_{\texttt{hold}})
+&=\big(\,((505,0),(0,5)),\;((0,5),(505,0))\,\big),
+\end{align*}
+and trivial updates $u^{(1')}_{\texttt{ready}}(\cdot) = u^{(1')}_{\texttt{aggressive}}(\cdot) = \texttt{ready}$.  From its initial state, $M_1'$ produces the same event $e_1$ as $M_1$; the second state would have produced $e_2$.  $M_1$ and $M_1'$ are different market-agents with different carriers, yet a single observation of $e_1$ does not distinguish them.
+
+\medskip
+In all three cases value is conserved (total $(1200, 20)$), the selected trades lie inside the exposed menus, and update consistency uses the same transition maps $f_{\texttt{eager}}$ and $f_{\texttt{hold}}$ from Alice's and Bob's behavior data (Example~\ref{ex:agent-without-portfolio}) --- Alice transitions to \texttt{cautious}, Bob remains in \texttt{hold}.  The market-agents differ only in their carriers and response rules, which is exactly the mechanism-side degree of freedom that distinguishes one market from another.
+\end{example}
+
+A single one-step observation rarely determines the market-agent --- $M_1$ and $M_1'$ above are different market-agents that produce the same event $e_1$.  The questions of \emph{multiplicity} (which market-agents could have produced a given event or history) and \emph{uniqueness} (when a long-enough history determines the market-agent) form an open thread we will not pursue here.
+
+Equilibria are a natural candidate interpretation of fixed points of the joint dynamics of participants and market.  As agents update their states under repeated event production, and the market updates its own, an equilibrium is a configuration on which both updates idle.
+
+Portfolios have been carried alongside the market-agent state throughout this discussion.  They constrain which trades an agent can actually realize, and events change them, but the behavioral data above deliberately separated willingness to trade from current holdings.  The next section packages this set-theoretic description in the formal notation used below and records the corresponding portfolio recombination target.
+
+%% ===================================================================
+\section*{The market-agent polynomial}
+%% ===================================================================
+
+The preceding section described the market-agent construction in ordinary language.  We now give the corresponding polynomial.  We use the standard position--direction notation for polynomial functors,
+\[
+p=\sum_{i:p(1)}\yon^{p[i]},
+\]
+where $p(1)$ is the set of positions and $p[i]$ is the set of directions at the position $i$.  We also use the standard Dirichlet tensor product $\otimes$, its internal hom $[p,q]$, and the dual $p^\vee\coloneqq[p,\yon]$; see Spivak's references on categorical structures in $\poly$ and on polynomial coalgebras as generalized dynamical systems.  The only readings needed below are these: tensor packages simultaneous interfaces, internal hom packages parameterized maps, and the dual packages a response rule to every position of a polynomial.
 
 \subsubsection*{Agents without portfolio}
-
-This subsection develops the single-agent base case; in \emph{The market-agent polynomial} below, tensoring this object with itself and dualizing produces the market-agent.  Of the four constructions from \emph{Polynomial preliminaries}, only the internal hom enters here; the tensor and dual appear in the next subsection.
 
 Define
 \[
 P_X \coloneqq \sum_{T\subseteq R\times R} \yon^{T X}.
 \]
-Here juxtaposition $TX$ in the exponent denotes the cartesian product $T\times X$; we use this convention for products of direction sets throughout.  A place of $P_X$ is a trade menu $T\subseteq R\times R$.  The directions at that menu are $T X$: an acceptable trade together with a local observation.  This matches the portfolio-free behavioral component of the agent data of \S1, with the local observation set $X$ playing its assigned role.
+Here juxtaposition $TX$ in the exponent denotes the cartesian product $T\times X$; we use this convention for products of direction sets throughout.  A place of $P_X$ is a trade menu $T\subseteq R\times R$.  The directions at that menu are $T X$: an acceptable visible swap $(g,h)$ together with a local observation.  This matches the portfolio-free behavioral component of the agent data of \S1, with the local observation set $X$ playing its assigned role.
 
-For any set $A$, the polynomial $A\yon^A$ has position set $A$ and constant direction set $A$ at every position.  A coalgebra $A\yon^A \to p$ is, by direct evaluation at $A$, a function $A \to p(A)$.  The Definition below records the unpacking for $p = P_X$: each state $b\in A$ becomes a choice of trade menu and an update map into $A$.
+For any polynomial interface $p$, a coalgebra $A\yon^A \to p$ is the standard polynomial-functor presentation of a stateful system with state set $A$ and interface $p$.  In the present case $p=P_X$, this says that each state $b\in A$ chooses a trade menu and an update map into $A$.
 
 \begin{definition}[Agent without portfolio]\label{def:agent-without-portfolio}
 An \emph{agent without portfolio} is a coalgebra
@@ -822,34 +867,24 @@ Equivalently, regarding $A$ as a constant polynomial, this can be curried as a m
 \[
 \yon^A\to [A,P_X].
 \]
-Evaluating the internal hom at $A$ collapses the curried form:
+Concretely, this is the data
 \[
-[A,P_X](A) \cong P_X(A)^A.
-\]
-Unfolding $P_X(A) = \sum_{T\subseteq R\times R} A^{T X}$ and distributing over the $A$-indexed product gives the concrete description
-\[
-P_X(A)^A \cong \prod_{b\in A}\sum_{T\subseteq R\times R}A^{T X}.
+\prod_{b\in A}\sum_{T\subseteq R\times R}A^{T X}.
 \]
 Thus each state $b\in A$ chooses a trade menu $T_b\subseteq R\times R$ and an update map
 \[
 T_b X\to A.
 \]
-The name \emph{without portfolio} records that no current holding $r \in R$ is part of the agent state: $A$ stores only the agent's internal state, and the menu $T_b$ lists candidate resource replacements without specifying which holding the agent currently has.  The directions in $T_b X$, written $(t,x)$, encode an executed trade $t$ together with the agent's local observation $x$.
+The name \emph{without portfolio} records that no current holding $r \in R$ is part of the agent state: $A$ stores only the agent's internal state, and the menu $T_b$ lists candidate visible swaps without specifying which holding the agent currently has.  The directions in $T_b X$, written $(t,x)$, encode an executed trade $t=(g,h)$ together with the agent's local observation $x$.
 \end{definition}
 
-\begin{example}\label{ex:agent-without-portfolio}
-Take $X = 1$, so each direction is a trade alone.  Alice from Example~\ref{ex:event} becomes an agent-without-portfolio with state set $A_{\mathrm{Alice}} = \{\texttt{eager}, \texttt{cautious}\}$, menus $T_{\texttt{eager}}$ (buy up to 5 shares at $\leq \$102$) and $T_{\texttt{cautious}}$ (buy up to 2 shares at $\leq \$98$), and update maps $T_b \to A_{\mathrm{Alice}}$ sending every direction to $\texttt{cautious}$.  Bob has state set $\{\texttt{hold}\}$, single menu $T_{\texttt{hold}}$ (sell up to 10 shares at $\geq \$100$), and update returning to $\texttt{hold}$.  The portfolios $(1000,0)$ and $(200,20)$ live outside the state sets; events act on them.  Example~\ref{ex:market-agent} below extends this picture to a market-agent producing the event of Example~\ref{ex:event}.
-\end{example}
+\subsubsection*{Market agents}
 
-\subsubsection*{The market-agent polynomial}
-
-Two moves lift the construction from a single agent to a market-agent: the tensor product in $\poly$ packages the finite participant context exposed to the market, and the dual packages the market's response rule.  We do the first move here and the second in the Definition below.
-
-A market mediates many exposed menus at once, so we package arbitrary finite participant contexts in a single polynomial:
+Two moves lift the construction from a single agent to a market-agent: the tensor product in $\poly$ packages the finite participant context exposed to the market, and the dual packages the market's response rule.  A market mediates many exposed menus at once, so we package arbitrary finite participant contexts in a single polynomial:
 \[
 P_X^{\mathrm{fin}}\coloneqq\sum_{n\in\nn}P_X^{\otimes n}.
 \]
-The superscript $\mathrm{fin}$ records that we sum over all finite arities, so a single object holds every $n$-participant context at once.  Using the tensor formula gives
+The superscript $\mathrm{fin}$ records that we sum over all finite arities, so a single object holds every $n$-participant context at once.  Written in position--direction form, this is
 \[
 P_X^{\mathrm{fin}}
 \cong
@@ -878,55 +913,6 @@ u_m\colon P_X^{\mathrm{fin}}(1)\to M,
 \]
 whose domain $P_X^{\mathrm{fin}}(1)\cong\sum_{n\in\nn}\{(T_1,\ldots,T_n):T_i\subseteq R\times R\}$ is the set of finite menu contexts.  When an actual context $(T_1,\ldots,T_n)$ is presented the market outputs the tuple $\epsilon_m(T_1,\ldots,T_n)$ and moves to the new market state $u_m(T_1,\ldots,T_n)$.
 \end{definition}
-
-Different market-agent state spaces and update rules model different mechanisms.  For a centralized exchange such as an NYSE-style central limit order book, the market agent may be close to literal: $M$ can include book state and the coalgebra can encode matching behavior.  For a decentralized system such as Bitcoin, there need not be one literal market agent; different choices of $M$ can model miners, mempool state, block selection, or the aggregate mechanism that participants use as a predictive fiction --- i.e.\ the global state of the blockchain, or the global ledger.
-
-\begin{example}\label{ex:market-agent}
-We present three market-agents that, given the same exposed menus from Alice and Bob, produce events with different relationships.  $M_1$ and $M_2$ produce two different events; $M_1$ and $M_1'$ are different market-agents producing the same event, illustrating that a single one-step observation does not determine the market-agent.
-
-Reuse Alice (state \texttt{eager}, portfolio $v_A = (1000, 0)$) and Bob (state \texttt{hold}, portfolio $v_B = (200, 20)$) from Example~\ref{ex:event}.  Take $X = 1$, so there are no local observations and a response rule is a tuple of trades alone.  The exposed menus form the 2-participant context $(T_{\texttt{eager}}, T_{\texttt{hold}})$.  Pairs $((v_A, v_A'), (v_B, v_B'))$ in $T_{\texttt{eager}} \times T_{\texttt{hold}}$ --- the direction set of $P_X^{\otimes 2}$ at the place $(T_{\texttt{eager}}, T_{\texttt{hold}})$ --- that conserve value are parametrized by a quantity $q \in \{1,\ldots,5\}$ and a price $p \in [100, 102]$.
-
-\medskip
-\noindent\textbf{Market-agent $M_1$ (passive matcher).}  Let $M_1 = \{\texttt{ready}\}$ with response rule
-\[
-\epsilon^{(1)}_{\texttt{ready}}(T_{\texttt{eager}}, T_{\texttt{hold}})
-=\big(\,((1000,0),(700,3)),\;((200,20),(500,17))\,\big)
-\]
-(quantity $q=3$ at price $p=100$) and update $u^{(1)}_{\texttt{ready}}(T_{\texttt{eager}}, T_{\texttt{hold}}) = \texttt{ready}$.  This market-agent produces exactly the event $e_1$ of Example~\ref{ex:event}.
-
-\medskip
-\noindent\textbf{Market-agent $M_2$ (aggressive midpoint).}  Let $M_2 = \{\texttt{ready}\}$ with
-\[
-\epsilon^{(2)}_{\texttt{ready}}(T_{\texttt{eager}}, T_{\texttt{hold}})
-=\big(\,((1000,0),(495,5)),\;((200,20),(705,15))\,\big)
-\]
-(quantity $q=5$ at price $p=101$) and $u^{(2)}_{\texttt{ready}}(\cdot) = \texttt{ready}$.  This produces a different event $e_2$:
-
-\begin{center}
-\begin{tikzpicture}[oriented WD, bby=2.5ex, bbx=1.5cm, bb port sep=1, bb min width=1.2cm]
-  \node[bb={2}{2}] (E) {$e_2$};
-  \draw[blue!70!black] (E_in1) to +(-.4cm,0) node[left, font=\scriptsize, text=blue!70!black] {Alice: $(\texttt{eager},\;(1000,0))$};
-  \draw[red!60!black] (E_in2) to +(-.4cm,0) node[left, font=\scriptsize, text=red!60!black] {Bob: $(\texttt{hold},\;(200,20))$};
-  \draw[blue!70!black] (E_out1) to +(.4cm,0) node[right, font=\scriptsize, text=blue!70!black] {$(\texttt{cautious},\;(495,5))$};
-  \draw[red!60!black] (E_out2) to +(.4cm,0) node[right, font=\scriptsize, text=red!60!black] {$(\texttt{hold},\;(705,15))$};
-\end{tikzpicture}
-\end{center}
-
-\medskip
-\noindent\textbf{Market-agent $M_1'$ (richer state, same one-step output).}  Let $M_1' = \{\texttt{ready},\,\texttt{aggressive}\}$ with initial state $\texttt{ready}$ and response rules
-\begin{align*}
-\epsilon^{(1')}_{\texttt{ready}}(T_{\texttt{eager}}, T_{\texttt{hold}})
-&=\big(\,((1000,0),(700,3)),\;((200,20),(500,17))\,\big),\\
-\epsilon^{(1')}_{\texttt{aggressive}}(T_{\texttt{eager}}, T_{\texttt{hold}})
-&=\big(\,((1000,0),(495,5)),\;((200,20),(705,15))\,\big),
-\end{align*}
-and trivial updates $u^{(1')}_{\texttt{ready}}(\cdot) = u^{(1')}_{\texttt{aggressive}}(\cdot) = \texttt{ready}$.  From its initial state, $M_1'$ produces the same event $e_1$ as $M_1$; the second state would have produced $e_2$.  $M_1$ and $M_1'$ are different market-agents with different carriers, yet a single observation of $e_1$ does not distinguish them.
-
-\medskip
-In all three cases value is conserved (total $(1200, 20)$), the selected trades lie inside the exposed menus, and update consistency uses the same transition maps $f_{\texttt{eager}}$ and $f_{\texttt{hold}}$ from Alice's and Bob's agent-without-portfolio coalgebras (Example~\ref{ex:agent-without-portfolio}) --- Alice transitions to \texttt{cautious}, Bob remains in \texttt{hold}.  The market-agents differ only in their carriers and response rules, which is exactly the mechanism-side degree of freedom that distinguishes one market from another.
-\end{example}
-
-A single one-step observation rarely determines the market-agent --- $M_1$ and $M_1'$ above are different market-agents that produce the same event $e_1$.  The questions of \emph{multiplicity} (which market-agents could have produced a given event or history) and \emph{uniqueness} (when a long-enough history determines the market-agent) form an open thread we will not pursue here.  Equilibria are a natural candidate interpretation of fixed points of the joint participant--market dynamics: as the agents update their states under repeated event production, and the market updates its own, an equilibrium is a configuration on which both updates idle.  Portfolios have been carried alongside the market-agent state without entering the polynomial-functor framework; the next subsection treats their reintroduction.
 
 \subsubsection*{Reintroducing portfolios}
 
