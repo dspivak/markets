@@ -497,14 +497,14 @@ Fix a set $X$ of local observations.  An \emph{agent} of type $X$ consists of:
 \item a current portfolio $r\in R$;
 \item a set $A$ of \emph{states};
 \item a current state $a\in A$;
-\item for each state $b \in A$, a \emph{trade menu} $T_b \subseteq R \times R$;
+\item for each state $b \in A$, a \emph{trade menu} $T_b \subseteq R \times R$, whose elements $(g,h)$ mean ``give $g$, receive $h$'';
 \item for each state $b \in A$, an \emph{update map} $f_b \colon T_b \times X \to A$.
 \end{enumerate}
 \end{definition}
 
 \medskip
 \textbf{Running example.}
-In this example, $X = 1$, so the update map at a state $b$ collapses to $f_b \colon T_b \to A$; for a trade $t=(r,r')$, we write the update as $f_b(t)$.
+In this example, $X = 1$, so the update map at a state $b$ collapses to $f_b \colon T_b \to A$; for a trade $t=(g,h)$, we write the update as $f_b(t)$.
 Let $R = \mathbb{R}^2$ with coordinates $(c, q)$, where $c$ is cash and $q$ is the quantity of one asset.  Consider two agents, Alice and Bob, initially in states \texttt{eager} and \texttt{hold}, with portfolios $v_A = (1000, 0)$ and $v_B = (200, 20)$.
 
 \medskip
@@ -554,14 +554,14 @@ Let $\Set{Agent}$ denote the class of all tuples $(A, \tau, a, v)$ where $\tau$ 
   \node[above right=-9pt and 0] at ($(E_out1)!.5!(E_out2)$) {$\vdots$};
 \end{tikzpicture}
 \]
-There will be three conditions for such a box to be a valid economic event: that there is no change between total assets entering and exiting the event, that each selected trade lies in the agent's current menu, and that each agent's current state when exiting the event is determined by their update map and local observation applied to the trade they participated in.
+There will be three conditions for such a box to be a valid economic event: that there is no change between total assets entering and exiting the event, that each selected trade lies in the agent's current menu and realizes the agent's portfolio change, and that each agent's current state when exiting the event is determined by their update map and local observation applied to the trade they participated in.
 \begin{definition}
 Let $x,x'\colon I\to\Set{Agent}$ with $x(i)=(A_i,\tau_i,a_i,v_i)$ and $x'(i)=(A_i,\tau_i,a_i',v_i')$ for each $i\in I$, and write $(T_i,f_i)\coloneqq\tau_i(a_i)$.  An \emph{exchange event}, written
 \[e\colon x\to x',\]
 consists of trade-observation pairs $(t_i,x_i)\in T_i\times X$ for each $i\in I$ such that three conditions hold:
 \begin{description}
 	\item[\quad Value conservation:] $\sum_{i\in I} v_i=\sum_{i\in I}v_i'$
-	\item[\quad Selected trade:] $t_i=(v_i,v_i')$, for each $i$, and
+	\item[\quad Trade realization:] writing $t_i=(g_i,h_i)$, there is some $k_i\in R$ such that $v_i=k_i+g_i$ and $v_i'=k_i+h_i$, for each $i$, and
 	\item[\quad Update consistency:] $f_i(t_i,x_i)=a_i'$, for each $i$.
 \end{description}
 \end{definition}
@@ -587,8 +587,8 @@ Alice is in state \texttt{eager} with portfolio $v_A = (1000, 0)$; Bob is in sta
 
 \noindent\emph{Trade willingness:}
 \begin{itemize}[nosep]
-\item Alice in state \texttt{eager} accepts buying up to 5 shares at $\leq\$102$.  The trade is 3 shares at \$100, so $t_A\coloneqq(v_A, v'_A) \in T_{\texttt{eager}}$.
-\item Bob in \texttt{hold} accepts selling up to 10 at $\geq\$100$.  The trade qualifies, so $t_B\coloneqq(v_B, v'_B) \in T_{\texttt{hold}}$.
+\item Alice in state \texttt{eager} accepts buying up to 5 shares at $\leq\$102$.  The trade is 3 shares at \$100, so $t_A\coloneqq((300,0),(0,3)) \in T_{\texttt{eager}}$: Alice gives \$300 and receives 3 shares.
+\item Bob in \texttt{hold} accepts selling up to 10 at $\geq\$100$.  The corresponding sell-side trade is $t_B\coloneqq((0,3),(300,0)) \in T_{\texttt{hold}}$: Bob gives 3 shares and receives \$300.
 \end{itemize}
 
 \noindent\emph{Update consistency:}
@@ -632,13 +632,13 @@ We just need to check the requirements. Value conservation holds $\sum_{i\in I}v
 \]
 Each event involves one update step from the coalgebras, whereas the proposed composite requires two steps. Indeed, if we tried to describe the composite as a single exchange event from $(a_i, v_i)$ to $(a_i'', v_i'')$, update consistency would require a trade-observation pair $(\bar t_i,\bar x_i)\in T_{a_i}X$ satisfying
 \[
-\bar t_i=(v_i,v_i'')\qand f_{a_i}(\bar t_i,\bar x_i)=a_i''.
+f_{a_i}(\bar t_i,\bar x_i)=a_i''
 \]
-But the actual two-step path is obtained from trade-observation pairs $(t_i,x_i)\in T_{a_i}X$ and $(t_i',x_i')\in T_{a_i'}X$, with $t_i=(v_i,v_i')$ and $t_i'=(v_i',v_i'')$:
+and realizing the net portfolio change from $v_i$ to $v_i''$.  But the actual two-step path is obtained from trade-observation pairs $(t_i,x_i)\in T_{a_i}X$ and $(t_i',x_i')\in T_{a_i'}X$, where $t_i$ realizes the change from $v_i$ to $v_i'$ and $t_i'$ realizes the change from $v_i'$ to $v_i''$:
 \[
 a_i'' \;=\; f_{a_i'}(t_i',x_i'),\where a_i'=f_{a_i}(t_i,x_i).
 \]
-There need not be any one-step trade-observation pair $(\bar t_i,\bar x_i)$ with the required underlying trade and state update. Similarly, $(v_i, v_i'')$ may not even belong to $T_{a_i}$, so trade realization can also fail.
+There need not be any one-step trade-observation pair $(\bar t_i,\bar x_i)$ with the required visible swap and state update.  Similarly, no trade in $T_{a_i}$ may realize the net portfolio change from $v_i$ to $v_i''$, so trade realization can also fail.
 
 Concretely: Alice and Bob trade in event $e_1$: Alice buys 3 shares at \$100 in state \texttt{eager} and transitions to \texttt{cautious}.  Then they trade again in event $e_2$, but now Alice's trade menu is different (buy up to 2 at $\leq\$98$ instead of up to 5 at $\leq\$102$).  No single event initiated when Alice's state is \texttt{eager} can capture this two-step history.
 
@@ -967,16 +967,16 @@ The equivalence in \eqref{eq:portfolio-recombination-target} is not a theorem es
 
 The goal of this section is to restate the event conditions of \S2 using the market-agent vocabulary introduced above.  The original exchange-event definition records what happened to the participants; the market-agent version adds a witness for how the selected trades were produced.  Thus the \S2 definition is recovered by existentially forgetting that witness.
 
-Fix a finite participant list $I=\{1,\ldots,n\}$.  For each $i\in I$, let $(A_i,T^i_{-},f^i_{-})$ be the portfolio-free behavioral data of a \S1 agent, with initial state $a_i\in A_i$, post-state $a_i'\in A_i$, initial resource $r_i\in R$, and post-resource $r_i'\in R$.  Also fix a local observation $x_i\in X$ for each participant, and let $M$ be a market agent in state $m\in M$.  Suppressing the participant superscripts on menus and update maps, an \emph{event-with-market-agent} is such data satisfying:
+Fix a finite participant list $I=\{1,\ldots,n\}$.  For each $i\in I$, let $(A_i,T^i_{-},f^i_{-})$ be the portfolio-free behavioral data of a \S1 agent, with initial state $a_i\in A_i$, post-state $a_i'\in A_i$, initial portfolio $v_i\in R$, and post-portfolio $v_i'\in R$.  Also fix a local observation $x_i\in X$ for each participant, and let $M$ be a market agent in state $m\in M$.  Suppressing the participant superscripts on menus and update maps, an \emph{event-with-market-agent} is such data satisfying:
 
 \begin{description}
   \item[\quad Portfolio coherence.]
   \[
-    \sum_{i\in I} r_i=\sum_{i\in I} r_i'.
+    \sum_{i\in I} v_i=\sum_{i\in I} v_i'.
   \]
 
   \item[\quad Agent behavior coherence.]
-  For each $i\in I$, the trade $t_i$ extracted from the market-agent response lies in $T_{a_i}$, realizes the resource change $t_i=(r_i,r_i')$, and updates the participant by
+  For each $i\in I$, the trade $t_i$ extracted from the market-agent response lies in $T_{a_i}$, and writing $t_i=(g_i,h_i)$ there is some $k_i\in R$ such that $v_i=k_i+g_i$ and $v_i'=k_i+h_i$.  The same trade and local observation update the participant by
   \[
     f_{a_i}(t_i,x_i)=a_i'.
   \]
@@ -1154,15 +1154,7 @@ Without state, limit order events compose trivially---everything collapses to a 
 %% ===================================================================
 
 \begin{question}
-In the special case $X=1$, one-step events in $\Event$ are closed under sequential composition if and only if the coalgebra satisfies
-\[
-f_{f_a(t_{12})}(t_{23}) \;=\; f_a(t_{13})
-\]
-for all composable pairs $t_{12}=(v_1,v_2) \in T_a$ and $t_{23}=(v_2,v_3) \in T_{f_a(t_{12})}$, where $t_{13}=(v_1,v_3)\in T_a$.  For general $X$, the analogous condition would have to account for local observations, with terms such as
-\[
-f_{f_a(t_{12},x_{12})}(t_{23},x_{23}) \;=\; f_a(t_{13},x_{13}).
-\]
-Characterize the $P_X$-coalgebras satisfying the appropriate condition.  Does it coincide with a known categorical notion?
+In the special case $X=1$, when are one-step events in $\Event$ closed under sequential composition?  A necessary condition is that every two-step history of visible swaps that can be realized from a portfolio also admits a one-step visible swap from the original state realizing the same net portfolio change and the same final state.  For general $X$, the analogous condition must also account for how the two local observations combine into the one local observation assigned to the collapsed step.  Characterize the $P_X$-coalgebras satisfying the appropriate condition.  Does it coincide with a known categorical notion?
 \end{question}
 
 
