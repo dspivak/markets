@@ -489,7 +489,7 @@ R supports rational coefficients likewise forces fractional holdings everywhere.
 \section*{Agents}
 %% ===================================================================
 
-\textbf{What are we trying to model?}
+\subsection*{What are we trying to model?}
 
 \noindent An economic agent has: 
 \begin{enumerate}
@@ -502,9 +502,7 @@ R supports rational coefficients likewise forces fractional holdings everywhere.
 
 So an agent has a portfolio; it has some set of internal states; it has a trading policy that depends on its state. Rather than assuming that every agent has a coherent theory of market prices encoded in a utility function, we ask less of an economic agent: the agent only needs to know which trades it is willing to accept. Whenever an acceptable trade is executed, the agent's state updates deterministically according to the information made available by the event.
 
-
-
-\begin{definition}
+\begin{definition} \label{def-of-agent}
 Fix a set $X$ of local observations.  An \emph{agent} of type $X$ consists of:
 \begin{enumerate}[nosep]
 \item a current portfolio $r\in R$;
@@ -515,8 +513,7 @@ Fix a set $X$ of local observations.  An \emph{agent} of type $X$ consists of:
 \end{enumerate}
 \end{definition}
 
-\medskip
-\textbf{Running example.}
+\begin{example}[Running example] \label{ex:running}
 In this example, $X = 1$, so the update map at a state $b$ collapses to $f_b \colon T_b \to A$; for a trade $t=(g,h)$, we write the update as $f_b(t)$.
 Let $R = \mathbb{R}^2$ with coordinates $(c, q)$, where $c$ is cash and $q$ is the quantity of one asset.  Consider two agents, Alice and Bob, initially in states \texttt{eager} and \texttt{hold}, with portfolios $v_A = (1000, 0)$ and $v_B = (200, 20)$.
 
@@ -546,13 +543,26 @@ $\texttt{hold}$ & sell up to 10 shares at $\geq\$100$ each & $\texttt{hold}$ for
 \hline
 \end{tabular}
 \end{center}
+\end{example}
+
+\begin{example}[Nontrivial observations]\label{ex:nontrivial-observations}
+The running example takes $X=1$ only to keep the notation light.  One could instead take
+\[
+X=C\times S,
+\]
+where $C$ records information about the counterparty and $S$ records an outside price signal, such as the current price of a related asset.  Then Alice's update has the form
+\[
+f_b(t,c,p),
+\]
+so the same executed trade $t$ may lead to different next states depending on who filled it and what other market information arrived with the fill.
+\end{example}
 
 %% ===================================================================
 \section*{Events}
 %% ===================================================================
 
-\textbf{Informal picture.}
-An event involves some number of agents simultaneously.  Each agent enters with a current state and a current portfolio and exits with a (possibly different) state and portfolio.  The underlying behavioral data from \S1---state set, trade menus, and update maps---does not change during an event.  What can change is the distribution of resources and the state of each agent.
+\subsection*{What counts as economic activity?}
+An event involves some number of agents simultaneously.  Each agent enters with a current state and a current portfolio and exits with a (possibly different) state and portfolio.  The underlying behavioral data from Definition \ref{def-of-agent}---state set, trade menus, and update maps---does not change for any agent during an event.  What can change is the distribution of resources and the state of each agent.
 
 Let $\Set{Agent}$ denote the class of all tuples $(A, \tau, a, v)$ where $\tau$ represents the portfolio-free behavioral data $(T_-,f_-)$ on $A$, $a\in A$ is the current state, and $v \in R$ is the current portfolio.  We draw an event as a box, as will later be used in string diagrams.  Each wire carries an agent.  Wires entering from the left are the agents before the event; wires exiting to the right are the agents after.
 
@@ -573,14 +583,14 @@ Let $x,x'\colon I\to\Set{Agent}$ with $x(i)=(A_i,\tau_i,a_i,v_i)$ and $x'(i)=(A_
 \[e\colon x\to x',\]
 consists of trade-observation pairs $(t_i,x_i)\in T_i\times X$ for each $i\in I$ such that three conditions hold:
 \begin{description}
-	\item[\quad Value conservation:] $\sum_{i\in I} v_i=\sum_{i\in I}v_i'$
+	\item[\quad Value conservation:%
+\footnote{Some markets charge a fee, or even destroy assets, which seems to violate conservation; but these can be modeled by including extra agents that ``belong to the market'' or that take ownership of destroyed assets, as happens explicitly on the Ethereum network.  This conservation law is local, and does not imply global conservation of value.}
+]%
+	$\sum_{i\in I} v_i=\sum_{i\in I}v_i'$
 	\item[\quad Trade realization:] writing $t_i=(g_i,h_i)$, there is some $k_i\in R$ such that $v_i=k_i+g_i$ and $v_i'=k_i+h_i$, for each $i$, and
 	\item[\quad Update consistency:] $f_i(t_i,x_i)=a_i'$, for each $i$.
 \end{description}
 \end{definition}
-
-\mygreen{Note: Some markets charge a fee, or even destroy assets, which seems to violate conservation; but these can be modeled via Conservation by including extra agents that "belong to market" or that ``take ownership" of destroyed assets, as happens explicitly on the Ethereum network.}
-\mygreen{Note: This conservation law is local, and does not imply a global conservation of value.}
 
 
 \begin{example}\label{ex:event}
@@ -596,7 +606,7 @@ Alice is in state \texttt{eager} with portfolio $v_A = (1000, 0)$; Bob is in sta
 \end{tikzpicture}
 \end{center}
 
-\noindent\emph{Value conservation:} $(1000,0) + (200,20) = (700,3) + (500,17) = (1200, 20)$.
+\noindent\emph{Value conservation:} $(1000,0) + (200,20) = (1200, 20) = (700,3) + (500,17) $.
 
 \noindent\emph{Trade willingness:}
 \begin{itemize}[nosep]
