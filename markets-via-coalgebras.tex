@@ -587,7 +587,7 @@ consists of trade-observation pairs $(t_i,x_i)\in T_i\times X$ for each $i\in I$
 \footnote{Some markets charge a fee, or even destroy assets, which seems to violate conservation; but these can be modeled by including extra agents that ``belong to the market'' or that take ownership of destroyed assets, as happens explicitly on the Ethereum network.  This conservation law is local, and does not imply global conservation of value.}
 ]%
 	$\sum_{i\in I} v_i=\sum_{i\in I}v_i'$
-	\item[\quad Trade realization:] writing $t_i=(g_i,h_i)$, there is some $k_i\in R$ such that $v_i=k_i+g_i$ and $v_i'=k_i+h_i$, for each $i$, and
+	\item[\quad Trade consistency:] writing $t_i=(g_i,h_i)$, there is some $k_i\in R$ such that $v_i=k_i+g_i$ and $v_i'=k_i+h_i$, for each $i$, and
 	\item[\quad Update consistency:] $f_i(t_i,x_i)=a_i'$, for each $i$.
 \end{description}
 \end{definition}
@@ -608,7 +608,7 @@ Alice is in state \texttt{eager} with portfolio $v_A = (1000, 0)$; Bob is in sta
 
 \noindent\emph{Value conservation:} $(1000,0) + (200,20) = (1200, 20) = (700,3) + (500,17) $.
 
-\noindent\emph{Trade willingness:}
+\noindent\emph{Trade consistency:}
 \begin{itemize}[nosep]
 \item Alice in state \texttt{eager} accepts buying up to 5 shares at $\leq\$102$.  The trade is 3 shares at \$100, so $t_A\coloneqq((300,0),(0,3)) \in T_{\texttt{eager}}$: Alice gives \$300 and receives 3 shares.
 \item Bob in \texttt{hold} accepts selling up to 10 at $\geq\$100$.  The corresponding sell-side trade is $t_B\coloneqq((0,3),(300,0)) \in T_{\texttt{hold}}$: Bob gives 3 shares and receives \$300.
@@ -636,7 +636,7 @@ Given events $e\colon x\to x'$ and $f\colon y\to y'$, where $x,x'\colon I\to\Set
 \end{proposition}
 
 \begin{proof}
-We just need to check the requirements. Value conservation holds $\sum_{i\in I}v_i+\sum_{j\in J}v_j=\sum_{i\in I}v'_i+\sum_{j\in J}v'_j$, since each sum holds separately.  Trade realization and update consistency hold for each participant, since they hold in $e$ and $f$ respectively.
+We just need to check the requirements. Value conservation holds $\sum_{i\in I}v_i+\sum_{j\in J}v_j=\sum_{i\in I}v'_i+\sum_{j\in J}v'_j$, since each sum holds separately.  Trade consistency and update consistency hold for each participant, since they hold in $e$ and $f$ respectively.
 \end{proof}
 
 
@@ -661,7 +661,7 @@ and realizing the net portfolio change from $v_i$ to $v_i''$.  But the actual tw
 \[
 a_i'' \;=\; f_{a_i'}(t_i',x_i'),\where a_i'=f_{a_i}(t_i,x_i).
 \]
-There need not be any one-step trade-observation pair $(\bar t_i,\bar x_i)$ with the required visible swap and state update.  Similarly, no trade in $T_{a_i}$ may realize the net portfolio change from $v_i$ to $v_i''$, so trade realization can also fail.
+There need not be any one-step trade-observation pair $(\bar t_i,\bar x_i)$ with the required visible swap and state update.  Similarly, no trade in $T_{a_i}$ may realize the net portfolio change from $v_i$ to $v_i''$, so trade consistency can also fail.
 
 Concretely: Alice and Bob trade in event $e_1$: Alice buys 3 shares at \$100 in state \texttt{eager} and transitions to \texttt{cautious}.  Then they trade again in event $e_2$, but now Alice's trade menu is different (buy up to 2 at $\leq\$98$ instead of up to 5 at $\leq\$102$).  No single event initiated when Alice's state is \texttt{eager} can capture this two-step history.
 
@@ -751,7 +751,7 @@ Moreover, for each $i:I$ with $x_i=(A_i,\tau_i,a_i,v_i)$ and $y_i=(A_i, \tau_i, 
 **
 \end{proof}
 
-The event prop $\Event$ contains all possible trading histories consistent with value conservation, trade realization, and update consistency: every way that agents could exchange resources, in any order, with any wiring.
+The event prop $\Event$ contains all possible trading histories consistent with value conservation, trade consistency, and update consistency: every way that agents could exchange resources, in any order, with any wiring.
 
 A \emph{market} should be some structured collection of events in $\Event$---the events that a particular market mechanism permits.  The eventual goal of this work is to pick out collections corresponding to specific real-world markets, and to ask whether this framework can recover existing financial mathematics or reveal structure that was not visible before.
 
@@ -977,18 +977,21 @@ The goal of this section is to restate the event conditions of \S2 using the mar
 Fix a finite participant list $I=\{1,\ldots,n\}$.  For each $i\in I$, let $(A_i,T^i_{-},f^i_{-})$ be the portfolio-free behavioral data of a \S1 agent, with initial state $a_i\in A_i$, post-state $a_i'\in A_i$, initial portfolio $v_i\in R$, and post-portfolio $v_i'\in R$.  Also fix a local observation $x_i\in X$ for each participant, and let $M$ be a market agent in state $m\in M$.  Suppressing the participant superscripts on menus and update maps, an \emph{event-with-market-agent} is such data satisfying:
 
 \begin{description}
-  \item[\quad Portfolio coherence.]
+  \item[\quad Value conservation.]
   \[
     \sum_{i\in I} v_i=\sum_{i\in I} v_i'.
   \]
 
-  \item[\quad Agent behavior coherence.]
-  For each $i\in I$, the trade $t_i$ extracted from the market-agent response lies in $T_{a_i}$, and writing $t_i=(g_i,h_i)$ there is some $k_i\in R$ such that $v_i=k_i+g_i$ and $v_i'=k_i+h_i$.  The same trade and local observation update the participant by
+  \item[\quad Trade consistency.]
+  For each $i\in I$, the trade $t_i$ extracted from the market-agent response lies in $T_{a_i}$, and writing $t_i=(g_i,h_i)$ there is some $k_i\in R$ such that $v_i=k_i+g_i$ and $v_i'=k_i+h_i$.
+
+  \item[\quad Update consistency.]
+  The same trade and local observation update the participant by
   \[
     f_{a_i}(t_i,x_i)=a_i'.
   \]
 
-  \item[\quad Market-agent coherence.]
+  \item[\quad Market-agent consistency.]
   If $\epsilon_m$ is the response rule of the market state $m$, then at the participant context $(T_{a_1},\ldots,T_{a_n})$ it returns exactly
   \[
     \epsilon_m(T_{a_1},\ldots,T_{a_n})
@@ -997,7 +1000,7 @@ Fix a finite participant list $I=\{1,\ldots,n\}$.  For each $i\in I$, let $(A_i,
   \]
 \end{description}
 
-The exchange event of \S2 is the existential reading of this definition: it is the same participant data, with the market-agent omitted, satisfying portfolio coherence and agent behavior coherence, such that there exists some market agent in some state witnessing the market-agent coherence condition.
+The exchange event of \S2 is the existential reading of this definition: it is the same participant data, with the market-agent omitted, satisfying value conservation, trade consistency, and update consistency, such that there exists some market agent in some state witnessing the market-agent consistency condition.
 
 Each generator of the event prop is a market-agent-witnessed event in this sense; the deeper rederivation of the generators and their relations is deferred to the next pass.
 
