@@ -25,3 +25,169 @@ What natural quotients of $\Event$ are economically meaningful?  Identifying mor
 \begin{question}
 A stateful limit order agent determines a $P_X$-coalgebra with limit-order-shaped trade menus.  Is there a useful functor in the reverse direction---from general $P_X$-coalgebras to stateful limit order agents?  A coalgebraic agent may exhibit cyclic trade preferences (willing to trade $A \to B$, $B \to C$, $C \to A$) that no limit order can represent, suggesting no such functor exists in general.
 \end{question}
+
+
+
+%% ===================================================================
+\section*{Limit order events}
+%% ===================================================================
+
+A central limit order book (CLOB) is a mechanism for trading financial assets---used, for example, by the New York Stock Exchange, NASDAQ, and the Chicago Mercantile Exchange.  To participate, an agent submits a \emph{limit order}: a declaration of which asset they want to buy or sell, how many units, and the most (or least) they are willing to pay per unit.  The exchange maintains a book of all standing orders.  Whenever a buy order's price meets or exceeds a sell order's price on the same asset, the two orders are matched: the trade executes at some price between the two limits, and the agents' portfolios update accordingly.
+
+Suppose we have $n$ assets and one cash asset, so $R = \mathbb{R}^{n+1}$ with coordinates $(c, q_1, \ldots, q_n)$, where $c$ is cash and $q_k$ is the quantity of asset $k$.
+
+\subsubsection*{Limit orders and fills}
+
+\begin{definition}[Limit order]\label{def:limit-order}
+A \emph{limit order} is a tuple $\ell = (k, s, q, p)$ where:
+\begin{itemize}
+\item $k \in \{1,\ldots,n\}$ is the asset,
+\item $s \in \{+1,-1\}$ is the side ($+1$ = buy, $-1$ = sell),
+\item $q \geq 0$ is the maximum quantity per fill ($q = 0$ means non-participation),
+\item $p > 0$ is the limit price: the most a buyer will pay per unit, or the least a seller will accept.
+\end{itemize}
+\end{definition}
+
+Recall that Alice, in state \texttt{eager}, was willing to buy up to 5 shares at $\leq\$102$ each.  As a limit order: $\ell_A = (1,\,+1,\,5,\,102)$.  In state \texttt{cautious}, she would submit a different order: $(1,\,+1,\,2,\,98)$.  Bob in state \texttt{hold} offers to sell up to 10 shares at $\geq\$100$: $\ell_B = (1,\,-1,\,10,\,100)$.
+
+\begin{definition}[Fill]\label{def:fill}
+A \emph{fill} of a limit order $\ell = (k, s, q, p)$ consists of an execution quantity $q' \in (0,q]$ and an execution price $p^*$ satisfying $p^* \leq p$ if $s = +1$ (buy), or $p^* \geq p$ if $s = -1$ (sell).  The fill changes the holder's portfolio by
+\[
+\delta(\ell,\, q',\, p^*) \;=\; (\underbrace{-s\,q'\,p^*}_{\text{cash}},\; 0, \ldots, \underbrace{s\,q'}_{\text{asset } k}, \ldots, 0).
+\]
+\end{definition}
+
+The event in Example~\ref{ex:event} was a fill: Alice's order $\ell_A = (1,+1,5,102)$ was filled at $q' = 3$, $p^* = 100$, giving $\delta(\ell_A, 3, 100) = (-300, 3)$.  Bob's order filled symmetrically: $\delta(\ell_B, 3, 100) = (+300, -3)$.  The two changes sum to zero---conservation.
+
+\subsubsection*{Limit order agents}
+
+\begin{definition}[Portfolio limit order]
+A \emph{portfolio limit order} is a tuple $L = (\ell_1, \ldots, \ell_n)$, one limit order per asset.  Non-participation in asset $k$ is indicated by setting $q_k = 0$ in $\ell_k$.
+\end{definition}
+
+\begin{definition}[Limit order agent]
+A \emph{limit order agent} is a pair $w = (v, L)$: a portfolio $v \in R$ and a portfolio limit order $L$.
+\end{definition}
+
+This is the simplest model of a CLOB participant: a portfolio and a standing set of orders.  Note that this is \emph{not} rich enough to model Alice---her limit order depends on her internal state, and this definition has no state.  We will return to this point.
+
+\subsubsection*{Fill events}
+
+\begin{definition}[Fill event]\label{def:fill-event}
+A \emph{fill event} among limit order agents $w_1 = (v_1, L_1), \ldots, w_m = (v_m, L_m)$ is a finite set of fills
+\[
+\mathcal{F} = \bigl\{(i_{\mathrm{buy}},\, \ell_{\mathrm{buy}},\; i_{\mathrm{sell}},\, \ell_{\mathrm{sell}},\; q',\; p^*)\bigr\}
+\]
+each pairing a buy order from agent $i_{\mathrm{buy}}$ with a sell order from agent $i_{\mathrm{sell}}$ on the same asset, with execution price between the two limits and quantity within both per-fill caps.  Each agent's portfolio updates by the sum of deltas from all fills they participate in.  The limit orders do not change: the same $L_i$ appear on input and output.
+\end{definition}
+
+\begin{center}
+\begin{tikzpicture}[oriented WD, bby=2.5ex, bbx=1.5cm, bb port sep=1.5, bb min width=1.2cm]
+  \node[bb={2}{2}] (E) {\footnotesize fill event};
+  \draw (E_in1) to +(-.4cm,0) node[left, font=\scriptsize] {$(v_1, L_1)$};
+  \draw (E_in2) to +(-.4cm,0) node[left, font=\scriptsize] {$(v_m, L_m)$};
+  \draw (E_out1) to +(.4cm,0) node[right, font=\scriptsize] {$(v'_1, L_1)$};
+  \draw (E_out2) to +(.4cm,0) node[right, font=\scriptsize] {$(v'_m, L_m)$};
+  \node[font=\scriptsize] at ($(E_in1)!.5!(E_in2)+(-.7cm,0)$) {$\vdots$};
+  \node[font=\scriptsize] at ($(E_out1)!.5!(E_out2)+(.7cm,0)$) {$\vdots$};
+\end{tikzpicture}
+\end{center}
+
+For instance, the event in Example~\ref{ex:event} is a fill event when Alice and Bob are viewed as limit order agents:
+
+\begin{center}
+\begin{tikzpicture}[oriented WD, bby=2.5ex, bbx=1.5cm, bb port sep=1, bb min width=1.2cm]
+  \node[bb={2}{2}] (E) {fill};
+  \draw[blue!70!black] (E_in1) to +(-.4cm,0) node[left, font=\scriptsize, text=blue!70!black] {Alice: $((1000,0),\;\ell_A)$};
+  \draw[red!60!black] (E_in2) to +(-.4cm,0) node[left, font=\scriptsize, text=red!60!black] {Bob: $((200,20),\;\ell_B)$};
+  \draw[blue!70!black] (E_out1) to +(.4cm,0) node[right, font=\scriptsize, text=blue!70!black] {$((700,3),\;\ell_A)$};
+  \draw[red!60!black] (E_out2) to +(.4cm,0) node[right, font=\scriptsize, text=red!60!black] {$((500,17),\;\ell_B)$};
+\end{tikzpicture}
+\end{center}
+
+Conservation is automatic: each fill transfers $q'p^*$ cash from buyer to seller and $q'$ units of asset from seller to buyer, netting to zero across all agents.
+
+\subsubsection*{Fill events compose}
+
+A natural question: what happens when we wire fill events together---some agents from one fill event feeding into another, with arbitrary wiring?  For example, three agents might participate in two fill events, with one agent's output from the first feeding into the second:
+
+\begin{center}
+\begin{tikzpicture}[oriented WD, bby=2ex, bbx=1.2cm, bb port sep=1, bb min width=1.2cm]
+  \node[bb={2}{2}] (E1) {\scriptsize fill $f_1$};
+  \node[bb={2}{2}, right=3 of E1, yshift=-3ex] (E2) {\scriptsize fill $f_2$};
+  % inputs to f1
+  \draw[blue!70!black] (E1_in1) to +(-.4cm,0) node[left, font=\scriptsize, text=blue!70!black] {$w_1$};
+  \draw[red!60!black] (E1_in2) to +(-.4cm,0) node[left, font=\scriptsize, text=red!60!black] {$w_2$};
+  % w3 input to f2
+  \draw[green!50!black] (E2_in2) to +(-.4cm,0) node[left, font=\scriptsize, text=green!50!black] {$w_3$};
+  % f1 output: w1' feeds into f2
+  \draw[blue!70!black] (E1_out1) to (E2_in1);
+  % f1 output: w2' exits
+  \draw[red!60!black] (E1_out2) to +(.4cm,0) node[right, font=\scriptsize, text=red!60!black] {$w'_2$};
+  % f2 outputs
+  \draw[blue!70!black] (E2_out1) to +(.4cm,0) node[right, font=\scriptsize, text=blue!70!black] {$w'_1$};
+  \draw[green!50!black] (E2_out2) to +(.4cm,0) node[right, font=\scriptsize, text=green!50!black] {$w'_3$};
+\end{tikzpicture}
+\end{center}
+
+It turns out that any such composite is itself achievable by a single fill event.
+
+\begin{proposition}\label{prop:fill-compose}
+Let $D$ be any string diagram built by wiring fill events together (sequentially, in parallel, or any combination) in which limit order agents $w_1, \ldots, w_m$ enter with portfolios $v_1, \ldots, v_m$ and exit with portfolios $v'_1, \ldots, v'_m$, all with the same limit orders $L_i$ throughout.  Then there exists a single fill event with the same input and output.
+\end{proposition}
+
+\begin{proof}
+The diagram $D$ contains some number of fill events, each consisting of a finite set of individual fills.  Let $\mathcal{F}$ be the union of all individual fills across every event in $D$.  We claim $\mathcal{F}$ is a valid set of fills for a single fill event among $w_1, \ldots, w_m$.
+
+Each fill in $\mathcal{F}$ pairs a buy order $\ell_{\mathrm{buy}}$ from some agent $i$ with a sell order $\ell_{\mathrm{sell}}$ from some agent $j$ on the same asset, at an execution price between the two limits and a quantity within both per-fill caps.  These validity conditions depend only on the limit orders---not on the agents' current portfolios.  Since the limit orders are the same at every stage of the diagram (they never change), every fill that was valid at an intermediate stage is equally valid at the start.
+
+The net portfolio change for each agent $i$ is the sum of the $\delta$-changes from all fills involving agent $i$.  This sum is the same whether the fills are spread across multiple events or collected into one.
+
+Conservation: each individual fill conserves (buyer's loss equals seller's gain), so their union conserves.
+\end{proof}
+
+\medskip
+The limit order setting, as defined, has no notion of multi-step complexity.  Any trading history among limit order agents---no matter how many intermediate events---is indistinguishable (in its net effect) from a single simultaneous fill.  This is not a defect of the model; it reflects a genuine feature of central limit order books.  When orders arrive at an exchange, the book matches them without regard to the sequence in which they were submitted---what matters is the set of standing orders and which ones are compatible.
+
+But the collapse also exposes what this model \emph{cannot} do.  Alice, whose willingness to trade depends on an internal state that updates after each event, is not a limit order agent in this sense.  Her behavior is inherently multi-step: what she will accept next depends on what has already happened.  To capture agents like Alice, we need state.
+
+%% ===================================================================
+\section*{Limit order events with state}
+%% ===================================================================
+
+A \emph{stateful limit order agent} has a set of internal states, and in each state, it presents a portfolio limit order.  After participating in a fill event, it transitions to a new state---possibly changing the orders it presents next.
+
+\begin{definition}[Stateful limit order agent]\label{def:stateful-lo}
+A \emph{stateful limit order agent} is a tuple $(S, s_0, \lambda, f, v)$ where:
+\begin{itemize}
+\item $S$ is a finite set of states, with initial state $s_0 \in S$,
+\item $\lambda\colon S \to \{\text{portfolio limit orders}\}$ assigns a portfolio limit order to each state,
+\item $f\colon S \times \{\text{valid fills of } \lambda(s)\} \to S$ is a transition map: after a fill in state $s$, the agent moves to state $f(s, \text{fill})$,
+\item $v \in R$ is the current portfolio.
+\end{itemize}
+\end{definition}
+
+Alice is now modelable.  With one asset ($n = 1$), a portfolio limit order is a single limit order.  She has $S = \{\texttt{eager}, \texttt{cautious}\}$ with $s_0 = \texttt{eager}$, and:
+\[
+\lambda(\texttt{eager}) = \bigl((1,+1,5,102)\bigr), \qquad \lambda(\texttt{cautious}) = \bigl((1,+1,2,98)\bigr).
+\]
+After any fill in state \texttt{eager}, she transitions to \texttt{cautious}.  In \texttt{cautious}, she stays.
+
+A \emph{stateful fill event} is defined just as before---a set of matched fills among participating agents---but now the output wires carry updated states as well as updated portfolios.  Each agent's fill must be valid against the limit order presented in their \emph{current} state, and the output state is determined by the transition rule.
+
+Does the composition property still hold?  Not in general.  After a fill, an agent may transition to a state with different limit orders.  A fill that was valid against the old orders may not be valid against the new ones.  This is exactly the situation we encountered with the event prop: Alice in \texttt{eager} accepts trades that Alice in \texttt{cautious} does not.  A multi-step history through intermediate state changes cannot, in general, be collapsed to a single step.
+
+This begins to look like the event prop itself.  A stateful limit order agent is an $F$-coalgebra whose trade menus are restricted to limit-order-shaped trades: in each state, the set of acceptable portfolio swaps is exactly the set of fills of the limit order presented in that state.  The transition map sends each fill to the successor state.  Fill events satisfying value conservation, trade consistency, and update consistency are generators of a prop---and because one-step events no longer compose, the right object is the free prop on these generators.
+
+\begin{remark}[The progression]
+Without state, limit order events compose trivially---everything collapses to a single step.  With state, they do not---and the resulting structure mirrors the event prop, restricted to agents whose preferences take the shape of limit orders.
+\end{remark}
+
+%% ===================================================================
+\section*{Avenues for Investigation}
+%% ===================================================================
+
+\begin{question}
+In the special case $X=1$, when are one-step events in $\Event$ closed under sequential composition?  A necessary condition is that every two-step history of visible swaps that can be realized from a portfolio also admits a one-step visible swap from the original state realizing the same net portfolio change and the same final state.  For general $X$, the analogous condition must also account for how the two local observations combine into the one local observation assigned to the collapsed step.  Characterize the $P_X$-coalgebras satisfying the appropriate condition.  Does it coincide with a known categorical notion?
+\end{question}
+
