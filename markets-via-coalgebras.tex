@@ -633,6 +633,16 @@ Our next goal is to define a colored prop with $\Set{Agent}$ as the set of color
 \begin{proposition}\label{prop:parallel}
 Given events $e\colon x\to x'$ and $f\colon y\to y'$, where $x,x'\colon I\to\Set{Agent}$ and $y,y'\colon J\to\Set{Agent}$, there exists an event
 \[(e,f)\colon (x,y)\to (x',y').\]
+\[
+\begin{tikzpicture}[oriented WD, bby=2.5ex, bbx=1.5cm, bb port sep=1, bb min width=1cm]
+  \node[bb={1}{1}] (E) {$e$};
+  \node[bb={1}{1}, below=1 of E] (F) {$f$};
+  \draw (E_in1) to +(-.5cm,0) node[left, font=\scriptsize] {$x$};
+  \draw (F_in1) to +(-.5cm,0) node[left, font=\scriptsize] {$y$};
+  \draw (E_out1) to +(.5cm,0) node[right, font=\scriptsize] {$x'$};
+  \draw (F_out1) to +(.5cm,0) node[right, font=\scriptsize] {$y'$};
+\end{tikzpicture}
+\]
 \end{proposition}
 
 \begin{proof}
@@ -640,30 +650,22 @@ We just need to check the requirements. Value conservation holds $\sum_{i\in I}v
 \end{proof}
 
 
-\Cref{prop:parallel} shows that exchange events are closed under parallel composition.  They are \emph{not} closed under sequential composition in general. Suppose we have two events on the same agents and we attempt to compose them sequentially:
+\Cref{prop:parallel} shows that exchange events are closed under parallel composition.  They are \emph{not} closed under sequential composition in general.
+
+For a concrete example, suppose Alice has three states $a_0,a_1,a_2$.  In state $a_0$ she will buy one share for \$100 and then move to $a_1$; in state $a_1$ she will buy one share for \$101 and then move to $a_2$.  Bob's state is fixed, and his menu contains the corresponding sell trades.  Starting from Alice's portfolio $(1000,0)$ and Bob's portfolio $(0,2)$, let $e_1$ and $e_2$ be the following two trades:
 \[
 \begin{tikzpicture}[oriented WD, bby=2.5ex, bbx=1.5cm, bb port sep=1, bb min width=1cm]
   \node[bb={2}{2}] (E1) {$e_1$};
   \node[bb={2}{2}, right=2 of E1] (E2) {$e_2$};
-  \draw (E1_in1) to +(-.4cm,0) node[left, font=\scriptsize] {$(a_1, v_1)$};
-  \draw (E1_in2) to +(-.4cm,0) node[left, font=\scriptsize] {$(a_2, v_2)$};
-  \draw (E1_out1) to node[above, font=\scriptsize] {$(a_1', v_1')$} (E2_in1);
-  \draw (E1_out2) to node[below, font=\scriptsize] {$(a_2', v_2')$} (E2_in2);
-  \draw (E2_out1) to +(.4cm,0) node[right, font=\scriptsize] {$(a_1'', v_1'')$};
-  \draw (E2_out2) to +(.4cm,0) node[right, font=\scriptsize] {$(a_2'', v_2'')$};
+  \draw[blue!70!black] (E1_in1) to +(-.4cm,0) node[left, font=\scriptsize, text=blue!70!black] {Alice: $(a_0,(1000,0))$};
+  \draw[red!60!black] (E1_in2) to +(-.4cm,0) node[left, font=\scriptsize, text=red!60!black] {Bob: $(b,(0,2))$};
+  \draw[blue!70!black] (E1_out1) to node[above, font=\scriptsize, text=blue!70!black] {$(a_1,(900,1))$} (E2_in1);
+  \draw[red!60!black] (E1_out2) to node[below, font=\scriptsize, text=red!60!black] {$(b,(100,1))$} (E2_in2);
+  \draw[blue!70!black] (E2_out1) to +(.4cm,0) node[right, font=\scriptsize, text=blue!70!black] {$(a_2,(799,2))$};
+  \draw[red!60!black] (E2_out2) to +(.4cm,0) node[right, font=\scriptsize, text=red!60!black] {$(b,(201,0))$};
 \end{tikzpicture}
 \]
-Each event involves one update step from the coalgebras, whereas the proposed composite requires two steps. Indeed, if we tried to describe the composite as a single exchange event from $(a_i, v_i)$ to $(a_i'', v_i'')$, update consistency would require a trade-observation pair $(\bar t_i,\bar x_i)\in T_{a_i}X$ satisfying
-\[
-f_{a_i}(\bar t_i,\bar x_i)=a_i''
-\]
-and realizing the net portfolio change from $v_i$ to $v_i''$.  But the actual two-step path is obtained from trade-observation pairs $(t_i,x_i)\in T_{a_i}X$ and $(t_i',x_i')\in T_{a_i'}X$, where $t_i$ realizes the change from $v_i$ to $v_i'$ and $t_i'$ realizes the change from $v_i'$ to $v_i''$:
-\[
-a_i'' \;=\; f_{a_i'}(t_i',x_i'),\where a_i'=f_{a_i}(t_i,x_i).
-\]
-There need not be any one-step trade-observation pair $(\bar t_i,\bar x_i)$ with the required visible swap and state update.  Similarly, no trade in $T_{a_i}$ may realize the net portfolio change from $v_i$ to $v_i''$, so trade consistency can also fail.
-
-Concretely: Alice and Bob trade in event $e_1$: Alice buys 3 shares at \$100 in state \texttt{eager} and transitions to \texttt{cautious}.  Then they trade again in event $e_2$, but now Alice's trade menu is different (buy up to 2 at $\leq\$98$ instead of up to 5 at $\leq\$102$).  No single event initiated when Alice's state is \texttt{eager} can capture this two-step history.
+In $e_1$, Alice's trade is $((100,0),(0,1))$ and Bob's is $((0,1),(100,0))$.  In $e_2$, Alice's trade is $((101,0),(0,1))$ and Bob's is $((0,1),(101,0))$.  Each step is an exchange event.  But there is no single exchange event from the initial pair to the final pair: Alice's menu in state $a_0$ contains only the first buy trade, not the net trade $((201,0),(0,2))$, and her update map from $a_0$ moves to $a_1$, not directly to $a_2$.  Thus trade consistency and update consistency both depend on the intermediate state.
 
 We therefore seek a categorical structure that accommodates both parallel and sequential composition of events, without requiring sequential composites to be one-step events.
 
