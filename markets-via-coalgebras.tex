@@ -460,16 +460,29 @@ citecolor=orange!50!black, urlcolor=orange!50!black, pdfencoding=unicode]{hyperr
 
 \title{A categorical approach to markets}
 \author{Joseph Hirsh and David I. Spivak\thanks{\thanksAFOSR{FA9550-23-1-0376}}}
-\date{}
+\date{\today}
 
 \begin{document}
 \maketitle
-
 \begin{abstract}
-\noindent Defines a general class of agents, markets, and market equilibrium state using category theory and polynomial functors.
+\noindent We model economic agents by asking less of them than
+classical theory does: an agent need not carry a utility function or
+a theory of prices, only a menu of trades it currently accepts and a
+deterministic state update for each executed trade and observation.
+Exchange events among such agents---trades that conserve value,
+draw from exposed menus, and update states consistently---generate a
+prop whose morphisms are all possible trading histories.  Markets
+then appear as agents one level up: a market-agent's hidden state
+selects, from each context of exposed menus, the deal that actually
+executes, packaging matching engines and social ambience alike as
+state-dependent response rules.  Throughout
+we use the language of polynomial functors, and we record a
+conjectural factorization separating an agent's behavior from its
+portfolio.
 \end{abstract}
 
-In what follows, we fix a resource set $R$ carrying the structure of a commutative monoid $(R,+,0)$, so that holdings $x, y \in R$ combine additively, $x+y \in R$.  The default mental picture is the free commutative monoid on a set of named fungible resources $\{ r_1, r_2, \ldots, r_n \}$ : each holding is a finite formal sum $\sum_i n_i r_i$: non-negative whole-number multiplicities $n_i$ of the resource $r_i$.  Assuming $R$ to be a group instead introduces negative elements, which forces the model to consider idealized debt for all assets in every trade scenario.  Assuming $R$ supports rational coefficients forces the model to consider fractional holdings for all assets in every trade scenario.%
+In what follows, we fix a resource set $R$ carrying the structure of a commutative monoid $(R,+,0)$, so that holdings $x, y \in R$ combine additively, $x+y \in R$.  The default mental picture is the free commutative monoid on a set of named fungible resources $\{ r_1, r_2, \ldots, r_n \}$: each holding is a finite formal sum $\sum_i n_i r_i$ of non-negative whole-number multiplicities $n_i$ of the resource $r_i$.  Assuming $R$ to be a group instead introduces negative elements, which forces the model to consider idealized debt for all assets in every trade scenario. Assuming RR
+R supports rational coefficients likewise forces fractional holdings everywhere.%
 \footnote{Even the assumption that holdings can be added seems brutal---not all economic resources worth considering are fungible! To describe the theory that allows for non-fungible resources, take $R$ to be a set, holdings to be subsets, and all arithmetic related to holdings would need to be replaced by corresponding abstractions applied to subsets. Instead of ``Alice gains 2 apples" being modeled by ``$r \mapsto r + 2r_{\textrm{apple}}$" it might look like ``$r \mapsto r \cup \{ \textrm{apple}_{203}, \textrm{apple}_{45305} \}$." While that paper would be fun to write, we woke up that day and chose kindness.}
 
 %% ===================================================================
@@ -979,7 +992,7 @@ The exchange event of \S2 is the existential reading of this definition: it is t
 Each generator of the event prop is a market-agent-witnessed event in this sense; the deeper rederivation of the generators and their relations is deferred to the next pass.
 
 \section*{Acknowledgments}
-The authors thank Andrea Abeje-Stine for interesting conversations.
+The authors thank Andrea Abeje-Stine and JD Stettin for interesting conversations.
 
 %% ===================================================================
 \section*{References}
