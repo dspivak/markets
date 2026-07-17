@@ -440,6 +440,7 @@ citecolor=orange!50!black, urlcolor=orange!50!black, pdfencoding=unicode]{hyperr
 \newcommand{\CLOB}{\mathrm{CLOB}}
 \newcommand{\LO}{\mathrm{LO}}
 \newcommand{\dnote}[1]{{\color{blue}\quad$\lozenge$\quad David says:\quad #1\quad$\lozenge$\quad}}
+\newcommand{\jnote}[1]{{\color{teal}\quad$\lozenge$\quad Joey says:\quad #1\quad$\lozenge$\quad}}
 
 \newcommand{\src}{\mathrm{src}}
 \newcommand{\tgt}{\mathrm{tgt}}
@@ -753,11 +754,15 @@ Moreover, for each $i:I$ with $x_i=(A_i,\tau_i,a_i,v_i)$ and $y_i=(A_i, \tau_i, 
 **
 \end{proof}
 
+\jnote{This proposition got ruined when I let Claude off his leash; we don't want to assume that the trade is for the whole portfolio out and the whole portfolio in.}
+
 The event prop $\Event$ contains all possible trading histories consistent with value conservation, trade consistency, and update consistency: every way that agents could exchange resources, in any order, with any wiring.
 
 A \emph{market} should be some structured collection of events in $\Event$---the events that a particular market mechanism permits.  The eventual goal of this work is to pick out collections corresponding to specific real-world markets, and to ask whether this framework can recover existing financial mathematics or reveal structure that was not visible before.
 
 We begin by formalizing the intuition that different markets act in different ways.
+
+\jnote{These last two paragraphs need to be adjusted; we've defined markets as agents. Maybe frame this as causal, or as choosing a path among all possible compatible trades\ldots}
 
 %% ===================================================================
 \section*{Markets as Agents}
@@ -896,6 +901,8 @@ and trivial updates $u^{(1')}_{\texttt{ready}}(\cdot) = u^{(1')}_{\texttt{aggres
 \medskip
 In all three cases value is conserved (total $(1200, 20)$), the selected trades lie inside the exposed menus, and update consistency uses Alice's and Bob's transition maps from the running example: Alice transitions to \texttt{cautious}, and Bob remains in \texttt{hold}.  %The market-agents differ only in their carriers and response rules, which is exactly the mechanism-side degree of freedom that distinguishes one market from another.
 \end{example}
+
+\jnote{I'd like to change the names of these three markets to something that makes sense.}
 
 A single one-step observation rarely determines the market-agent --- $M_1$ and $M_1'$ above are different market-agents that produce the same event $e_1$.  The questions of \emph{multiplicity} (which market-agents could have produced a given event or history) and \emph{uniqueness} (when a long-enough history determines the market-agent) form an open thread we will not pursue here.
 
