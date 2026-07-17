@@ -757,16 +757,63 @@ The event prop $\Event$ contains all possible trading histories consistent with 
 
 A \emph{market} should be some structured collection of events in $\Event$---the events that a particular market mechanism permits.  The eventual goal of this work is to pick out collections corresponding to specific real-world markets, and to ask whether this framework can recover existing financial mathematics or reveal structure that was not visible before.
 
-We begin by formalizing the intuition that different markets ``act" in different ways.
+We begin by formalizing the intuition that different markets act in different ways.
 
 %% ===================================================================
 \section*{Markets as Agents}
 %% ===================================================================
 
-\textbf{Informal picture.}
-Participants often reason about a market as though it has internal state and repeatable behavior.  Given exposed trade menus, the market selects trades, supplies observations, and changes what it will do next.  This may describe an actual mechanism, such as an algorithmic exchange, or it may be a useful fiction induced by participants' modeling of the aggregate system.
+\subsection*{Why did Alice and Bob only trade 3 shares?}
 
-The purpose of this section is to make that market-agent visible before introducing the formal notation.  An ordinary agent has a state, a trade menu in each state, and an update rule.  A market-agent has the same shape of description at the next scale: it has a market state, a rule for responding to the finite list of menus currently exposed by the participants, and an update rule for its own state.
+The model so far describes what \emph{can} happen, not what \emph{does}.
+Consider Alice and Bob from the running example, and the event of
+Example~\ref{ex:event}, and ask: \emph{why did the trade of \$300 for
+3 shares execute?}  Alice's and Bob's menus in their current states
+make a whole family of deals acceptable to both---one for each
+quantity--price pair in $\{1,\ldots,5\}\times[100,102]$---yet exactly
+one of them occurred, and nothing in the agents themselves selects it.
+A theory of markets should offer agents---and the economists who
+study them!---some account of how one deal, among all acceptable
+deals, is arrived at. This section introduces that
+account into the model.
+
+Ask the question of a real trade and the answers vary widely in
+character.  If the deal was mediated by an exchange such as the New
+York Stock Exchange, the answer is an algorithm: whichever party's
+order was resting at the exchange first, the executed price is that
+order's price (\emph{price--time priority}).  If the deal was instead struck over 
+expensive wine at a private residence, the answer could involve factors no ledger records: 
+how much wine Alice and Bob had, or who else was in attendance.
+And behind either sit global factors---interest rates, drought,
+war---bearing on what price gets ``discovered.''  Participants can
+reason about the selection, but they may never know why this deal
+executed rather than another they would equally have accepted.
+
+These answers nonetheless share a shape, and the shape is what we
+formalize: given the exposed trade menus, \textbf{the market selects
+trades, supplies observations, and changes what it will do next.}
+Whatever the true causal story---matching engine, social ambience,
+macroeconomy---we package it as the internal state of one more agent,
+the \emph{market-agent}, whose response to the exposed menus is
+deterministic \emph{given} that state.  The state may describe an
+actual mechanism, as for an algorithmic exchange, or a useful fiction:
+the aggregate system as participants model it.  Unexplained selection
+is thereby traded for hidden market state.
+
+The market-agent has the same shape as the agents of
+Definition~\ref{def-of-agent}, at one level up: where an agent has a state,
+a menu in each state, and an update rule, the market-agent has a market
+state, a response to the menus currently exposed by the participating agents,
+and an update rule for its own state.
+
+\textbf{Exposed menus and market response.}
+A market, then, must mediate many exposed menus at once.  If $n$ participants expose menus $(T_1,\ldots,T_n)$, then a market response chooses one trade-and-observation pair from each menu:
+\[
+((t_1,x_1),\ldots,(t_n,x_n))\in T_1X\cdots T_nX.
+\]
+Here $T_iX$ denotes $T_i\times X$.  Such a response is exactly the extra mechanism-side data missing from a bare exchange event: the event records what happened to the agents, while the market response records how the selected trades were produced from the exposed menus. 
+
+In this framing every explanation of a selection takes the same form: the chosen tuple $((t_1,x_1),\ldots,(t_n,x_n))$ is the output of a deterministic function of the market state $m$.  Markets differ not in the form of the explanation but in the state space and the function.
 
 \begin{center}
 \begin{tikzpicture}[oriented WD, bby=2.5ex, bbx=1.5cm, bb port sep=1.3, bb min width=2.2cm]
@@ -784,24 +831,6 @@ The purpose of this section is to make that market-agent visible before introduc
 \end{tikzpicture}
 \end{center}
 
-\textbf{Separating behavior from holdings.}
-For this step we temporarily separate an agent's behavioral state from its current portfolio.  In state $b\in A$, an agent exposes a menu $T_b\subseteq R\times R$ of acceptable visible swaps and has an update map
-\[
-T_b\times X\to A.
-\]
-A direction $(t,x)$ records the trade $t=(g,h)$ that was executed---give $g$, receive $h$---together with the local observation $x$ supplied to the agent.  The current portfolio is not discarded; it is carried alongside the state and is changed by events.  The point of the temporary separation is that the behavioral part can be packaged first, and portfolios can then be reintroduced as an additional component.
-
-\begin{example}\label{ex:agent-without-portfolio}
-Take $X = 1$, so each direction is a trade alone.  Alice from Example~\ref{ex:event} has state set $A_{\mathrm{Alice}} = \{\texttt{eager}, \texttt{cautious}\}$, menus $T_{\texttt{eager}}$ (buy up to 5 shares at $\leq \$102$) and $T_{\texttt{cautious}}$ (buy up to 2 shares at $\leq \$98$), and update maps $T_b \to A_{\mathrm{Alice}}$ sending every direction to $\texttt{cautious}$.  Bob has state set $\{\texttt{hold}\}$, single menu $T_{\texttt{hold}}$ (sell up to 10 shares at $\geq \$100$), and update returning to $\texttt{hold}$.  The portfolios $(1000,0)$ and $(200,20)$ live outside the state sets; events act on them.
-\end{example}
-
-\textbf{Exposed menus and market response.}
-A market mediates many exposed menus at once.  If $n$ participants expose menus $(T_1,\ldots,T_n)$, then a market response chooses one trade-and-observation pair from each menu:
-\[
-((t_1,x_1),\ldots,(t_n,x_n))\in T_1X\cdots T_nX.
-\]
-Here $T_iX$ denotes $T_i\times X$.  Such a response is exactly the extra mechanism-side data missing from a bare exchange event: the event records what happened to the agents, while the market response records how the selected trades were produced from the exposed menus.
-
 A market-agent is the stateful object that answers every finite menu context.  In market state $m$, it has a response rule
 \[
 \epsilon_m(T_1,\ldots,T_n)=((t_1,x_1),\ldots,(t_n,x_n))
@@ -813,12 +842,23 @@ u_m(T_1,\ldots,T_n)=m'
 sending the presented menu context to the next market state.  Different state spaces, response rules, and update rules model different mechanisms.  For a centralized exchange such as an NYSE-style central limit order book, the market agent may be close to literal: the market state can include book state and the response rule can encode matching behavior.  For a decentralized system such as Bitcoin, there need not be one literal market agent; different choices of state space can model miners, mempool state, block selection, or the aggregate mechanism that participants use as a predictive fiction --- i.e.\ the global state of the blockchain, or the global ledger.
 
 \begin{example}\label{ex:market-agent}
-Three market-agents, given the same exposed menus from Alice and Bob, can produce events with different relationships.  $M_1$ and $M_2$ produce two different events.  $M_1$ and $M_1'$ are different market-agents producing the same event, illustrating that a single one-step observation does not determine the market-agent.
+Three market-agents, given the same exposed menus from Alice and Bob,
+illustrate two degrees of freedom: $M_1$ and $M_2$ select
+different events from the same menus, while $M_1$ and $M_1'$ are
+different market-agents selecting the same event%---so a one-step
+%observation neither determines the selection rule nor the carrier
+.
 
-Reuse Alice (state \texttt{eager}, portfolio $v_A = (1000, 0)$) and Bob (state \texttt{hold}, portfolio $v_B = (200, 20)$) from Example~\ref{ex:event}.  Take $X = 1$, so there are no local observations and a response rule is a tuple of trades alone.  The exposed menus form the 2-participant context $(T_{\texttt{eager}}, T_{\texttt{hold}})$.  Matching buy/sell pairs in $T_{\texttt{eager}} \times T_{\texttt{hold}}$ that conserve value are parametrized by a quantity $q \in \{1,\ldots,5\}$ and a price $p \in [100, 102]$: Alice's trade is $((pq,0),(0,q))$ and Bob's is $((0,q),(pq,0))$.
+Reuse Alice (state \texttt{eager}, portfolio $v_A = (1000, 0)$) and Bob (state \texttt{hold}, portfolio $v_B = (200, 20)$) from Example~\ref{ex:event}.  Take $X = 1$, so there are no local observations and a response rule is a tuple of trades alone.  The exposed menus form the 2-participant context $(T_{\texttt{eager}}, T_{\texttt{hold}})$.
+
+The compatible buy/sell pairs are completely parametrized by a quantity and a price:
+\[
+\{1,\ldots,5\}\times [100,102].
+\]
+For each $(q,p)$ in this set, Alice's trade is $((pq,0),(0,q))$ and Bob's trade is $((0,q),(pq,0))$.  These trades lie in the exposed menus and conserve value.  Thus, in this two-agent context, a market mechanism is precisely what picks a point $(q,p)$ in this compatible set.
 
 \medskip
-\noindent\textbf{Market-agent $M_1$ (passive matcher).}  Let $M_1 = \{\texttt{ready}\}$ with response rule
+\noindent\textbf{Market-agent $M_1$ (price-time priority matcher).}  Let $M_1 = \{\texttt{ready}\}$ with response rule
 \[
 \epsilon^{(1)}_{\texttt{ready}}(T_{\texttt{eager}}, T_{\texttt{hold}})
 =\big(\,((300,0),(0,3)),\;((0,3),(300,0))\,\big)
@@ -854,20 +894,20 @@ Reuse Alice (state \texttt{eager}, portfolio $v_A = (1000, 0)$) and Bob (state \
 and trivial updates $u^{(1')}_{\texttt{ready}}(\cdot) = u^{(1')}_{\texttt{aggressive}}(\cdot) = \texttt{ready}$.  From its initial state, $M_1'$ produces the same event $e_1$ as $M_1$; the second state would have produced $e_2$.  $M_1$ and $M_1'$ are different market-agents with different carriers, yet a single observation of $e_1$ does not distinguish them.
 
 \medskip
-In all three cases value is conserved (total $(1200, 20)$), the selected trades lie inside the exposed menus, and update consistency uses the same transition maps $f_{\texttt{eager}}$ and $f_{\texttt{hold}}$ from Alice's and Bob's behavior data (Example~\ref{ex:agent-without-portfolio}) --- Alice transitions to \texttt{cautious}, Bob remains in \texttt{hold}.  The market-agents differ only in their carriers and response rules, which is exactly the mechanism-side degree of freedom that distinguishes one market from another.
+In all three cases value is conserved (total $(1200, 20)$), the selected trades lie inside the exposed menus, and update consistency uses Alice's and Bob's transition maps from the running example: Alice transitions to \texttt{cautious}, and Bob remains in \texttt{hold}.  %The market-agents differ only in their carriers and response rules, which is exactly the mechanism-side degree of freedom that distinguishes one market from another.
 \end{example}
 
 A single one-step observation rarely determines the market-agent --- $M_1$ and $M_1'$ above are different market-agents that produce the same event $e_1$.  The questions of \emph{multiplicity} (which market-agents could have produced a given event or history) and \emph{uniqueness} (when a long-enough history determines the market-agent) form an open thread we will not pursue here.
 
 Equilibria are a natural candidate interpretation of fixed points of the joint dynamics of participants and market.  As agents update their states under repeated event production, and the market updates its own, an equilibrium is a configuration on which both updates idle.
 
-Portfolios have been carried alongside the market-agent state throughout this discussion.  They constrain which trades an agent can actually realize, and events change them, but the behavioral data above deliberately separated willingness to trade from current holdings.  The next section packages this set-theoretic description in the formal notation used below and records the corresponding portfolio recombination target.
+The next section packages this set-theoretic description in the formal notation used below and records the corresponding portfolio recombination target.
 
 %% ===================================================================
 \section*{The market-agent polynomial}
 %% ===================================================================
 
-The preceding section described the market-agent construction in ordinary language.  We now give the corresponding polynomial.  We use the standard position--direction notation for polynomial functors,
+The preceding section described the market-agent construction in ordinary language.  We now give the corresponding polynomial.  This is the point at which we temporarily separate behavioral state from current portfolio: the polynomial packages menus and updates first, while portfolios are carried alongside and reintroduced below.  We use the standard position--direction notation for polynomial functors,
 \[
 p=\sum_{i:p(1)}\yon^{p[i]},
 \]
