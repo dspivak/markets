@@ -477,13 +477,10 @@ then appear as agents one level up: a market-agent's hidden state
 selects, from each context of exposed menus, the deal that actually
 executes, packaging matching engines and social ambience alike as
 state-dependent response rules.  Throughout
-we use the language of polynomial functors, and we record a
-conjectural factorization separating an agent's behavior from its
-portfolio.
+we use the language of polynomial functors.
 \end{abstract}
 
-In what follows, we fix a resource set $R$ carrying the structure of a commutative monoid $(R,+,0)$, so that holdings $x, y \in R$ combine additively, $x+y \in R$.  The default mental picture is the free commutative monoid on a set of named fungible resources $\{ r_1, r_2, \ldots, r_n \}$: each holding is a finite formal sum $\sum_i n_i r_i$ of non-negative whole-number multiplicities $n_i$ of the resource $r_i$.  Assuming $R$ to be a group instead introduces negative elements, which forces the model to consider idealized debt for all assets in every trade scenario. Assuming RR
-R supports rational coefficients likewise forces fractional holdings everywhere.%
+In what follows, we fix a resource set $R$ carrying the structure of a commutative monoid $(R,+,0)$, so that holdings $x, y \in R$ combine additively, $x+y \in R$.  The default mental picture is the free commutative monoid on a set of named fungible resources $\{ r_1, r_2, \ldots, r_n \}$: each holding is a formal sum $\sum_{i=1}^n m_i r_i$ of non-negative whole-number multiplicities $m_i$ of the resource $r_i$.  Assuming $R$ to be a group instead introduces negative elements, which forces the model to consider idealized debt for all assets in every trade scenario. Assuming $R$ supports rational coefficients likewise forces fractional holdings everywhere.%
 \footnote{Even the assumption that holdings can be added seems brutal---not all economic resources worth considering are fungible! To describe the theory that allows for non-fungible resources, take $R$ to be a set, holdings to be subsets, and all arithmetic related to holdings would need to be replaced by corresponding abstractions applied to subsets. Instead of ``Alice gains 2 apples" being modeled by ``$r \mapsto r + 2r_{\textrm{apple}}$" it might look like ``$r \mapsto r \cup \{ \textrm{apple}_{203}, \textrm{apple}_{45305} \}$." While that paper would be fun to write, we woke up that day and chose kindness.}
 
 %% ===================================================================
@@ -578,16 +575,15 @@ Let $\Set{Agent}$ denote the class of all tuples $(A, \tau, a, v)$ where $\tau$ 
   \node[above right=-9pt and 0] at ($(E_out1)!.5!(E_out2)$) {$\vdots$};
 \end{tikzpicture}
 \]
-There will be three conditions for such a box to be a valid economic event: that there is no change between total assets entering and exiting the event, that each selected trade lies in the agent's current menu and realizes the agent's portfolio change, and that each agent's current state when exiting the event is determined by their update map and local observation applied to the trade they participated in.
+There will be three conditions for such a box to be a valid economic event: that there is no change between total assets entering and exiting the event%
+\footnote{Some markets charge a fee, or even destroy assets, which seems to violate this assumption; but these can be modeled by including extra agents that ``belong to the market'' or that take ownership of destroyed assets, as happens explicitly on the Ethereum network.}
+, that each selected trade lies in the agent's current menu and realizes the agent's portfolio change, and that each agent's current state when exiting the event is determined by their update map and local observation applied to the trade they participated in.
 \begin{definition}
 Let $x,x'\colon I\to\Set{Agent}$ with $x(i)=(A_i,\tau_i,a_i,v_i)$ and $x'(i)=(A_i,\tau_i,a_i',v_i')$ for each $i\in I$, and write $(T_i,f_i)\coloneqq\tau_i(a_i)$.  An \emph{exchange event}, written
 \[e\colon x\to x',\]
 consists of trade-observation pairs $(t_i,x_i)\in T_i\times X$ for each $i\in I$ such that three conditions hold:
 \begin{description}
-	\item[\quad Value conservation:%
-\footnote{Some markets charge a fee, or even destroy assets, which seems to violate conservation; but these can be modeled by including extra agents that ``belong to the market'' or that take ownership of destroyed assets, as happens explicitly on the Ethereum network.  This conservation law is local, and does not imply global conservation of value.}
-]%
-	$\sum_{i\in I} v_i=\sum_{i\in I}v_i'$
+	\item[\quad Value conservation:] $\sum_{i\in I} v_i=\sum_{i\in I}v_i'$
 	\item[\quad Trade consistency:] writing $t_i=(g_i,h_i)$, there is some $k_i\in R$ such that $v_i=k_i+g_i$ and $v_i'=k_i+h_i$, for each $i$, and
 	\item[\quad Update consistency:] $f_i(t_i,x_i)=a_i'$, for each $i$.
 \end{description}
